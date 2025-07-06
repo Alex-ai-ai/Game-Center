@@ -370,8 +370,8 @@ function hardDrop() {
 }
 
 document.addEventListener('keydown', e => {
-    if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(e.key)) {
-        e.preventDefault(); // 阻止页面滚动
+    if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "Tab"].includes(e.key)) {
+        e.preventDefault(); // 阻止页面滚动和Tab默认行为
     }
     if (e.key === ' ' && !gameOver) {
         setPause(!paused);
@@ -382,20 +382,10 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') move(-1, 0);
     else if (e.key === 'ArrowRight') move(1, 0);
     else if (e.key === 'ArrowDown') {
-        const now = Date.now();
-        if (now - lastDownPress <= 600) { // 0.6秒内按下
-            downPressCount++;
-            if (downPressCount >= 3) { // 连续按下3次
-                hardDrop();  // 直接掉落到底部
-                downPressCount = 0;  // 重置计数
-            } else {
-                move(0, 1);
-            }
-        } else {
-            downPressCount = 1;  // 重新开始计数
-            move(0, 1);
-        }
-        lastDownPress = now;  // 更新时间
+        move(0, 1);
+    }
+    else if (e.key === 'Tab') {
+        hardDrop();  // 按Tab键直接下落到底部
     }
     else if (e.key === 'ArrowUp') {
         tryRotate(current);
