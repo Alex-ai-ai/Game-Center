@@ -2,13 +2,50 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0;url=menu.html">
-    <script>
-      window.location.href = "menu.html";
-    </script>
+    <title>俄罗斯方块升级版</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <p>正在跳转到主菜单...</p>
+    <!-- 主菜单 -->
+    <div id="menu-container">
+        <h1>俄罗斯方块升级版</h1>
+        <div id="best-score-panel">最高纪录：<span id="best-score">0</span></div>
+        <button id="start-btn">开始游戏</button>
+    </div>
+    <!-- 游戏主界面 -->
+    <div id="main-container" style="display:none;">
+        <div id="score-panel">分数：<span id="score">0</span></div>
+        <canvas id="tetris" width="300" height="600"></canvas>
+        <button id="pause-btn"><span id="pause-icon">&#10073;&#10073;</span> 暂停</button>
+    </div>
+    <!-- 结束界面 -->
+    <div id="end-screen" style="display:none;">
+        <h2 id="end-title"></h2>
+        <div id="star-container"></div>
+        <div id="end-score"></div>
+        <button id="restart-btn">再来一局</button>
+        <button id="menu-btn">返回菜单</button>
+    </div>
+    <script src="game.js"></script>
+    <script>
+        // 主菜单逻辑
+        document.getElementById('start-btn').onclick = function() {
+            document.getElementById('menu-container').style.display = 'none';
+            document.getElementById('main-container').style.display = '';
+            if(typeof resetGame === 'function') resetGame();
+        };
+        // 返回菜单按钮逻辑
+        document.getElementById('menu-btn').onclick = function() {
+            document.getElementById('main-container').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('menu-container').style.display = '';
+        };
+        // 显示最高纪录
+        document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
+        // 初始只显示主菜单
+        document.getElementById('menu-container').style.display = '';
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'none';
+    </script>
 </body>
 </html> 
