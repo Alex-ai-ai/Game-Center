@@ -76,4 +76,27 @@ body {
 }
 #restart-btn:hover, #menu-btn:hover, #start-btn:hover {
     background: #1565c0;
+}
+#pause-btn {
+    position: absolute;
+    left: 32px;
+    top: 32px;
+    z-index: 2;
+    padding: 6px 18px;
+    font-size: 1em;
+    border: none;
+    border-radius: 6px;
+    background: #ff9800;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#pause-btn.paused {
+    background: #757575;
+}
+#pause-btn:hover {
+    background: #e65100;
+}
+#main-container {
+    position: relative;
 } 

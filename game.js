@@ -12,6 +12,7 @@ const endScore = document.getElementById('end-score');
 const starContainer = document.getElementById('star-container');
 const restartBtn = document.getElementById('restart-btn');
 const menuBtn = document.getElementById('menu-btn');
+const pauseBtn = document.getElementById('pause-btn');
 
 const COLORS = [
     '#00ffff', // I
@@ -33,6 +34,7 @@ const SHAPES = [
 ];
 
 let board, current, score, gameOver, dropInterval, dropTimer;
+let paused = false;
 
 function resetGame() {
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
@@ -45,6 +47,7 @@ function resetGame() {
     if (dropTimer) clearInterval(dropTimer);
     dropTimer = setInterval(tick, 500);
     draw();
+    setPause(false);
 }
 
 function randomPiece() {
@@ -162,11 +165,32 @@ function hardDrop() {
     tick();
 }
 
+function setPause(state) {
+    paused = state;
+    if (paused) {
+        pauseBtn.textContent = '继续';
+        pauseBtn.classList.add('paused');
+        if (dropTimer) clearInterval(dropTimer);
+    } else {
+        pauseBtn.textContent = '暂停';
+        pauseBtn.classList.remove('paused');
+        if (!gameOver) dropTimer = setInterval(tick, 500);
+    }
+}
+
+pauseBtn.onclick = function() {
+    setPause(!paused);
+};
+
 document.addEventListener('keydown', e => {
     if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(e.key)) {
         e.preventDefault(); // 阻止页面滚动
     }
-    if (gameOver) return;
+    if (e.key === ' ' && !gameOver) {
+        setPause(!paused);
+        return;
+    }
+    if (paused || gameOver) return;
     if (e.key === 'ArrowLeft') move(-1, 0);
     else if (e.key === 'ArrowRight') move(1, 0);
     else if (e.key === 'ArrowDown') move(0, 1);
@@ -176,8 +200,6 @@ document.addEventListener('keydown', e => {
             current.shape = newShape;
             draw();
         }
-    } else if (e.key === ' ') {
-        hardDrop();
     }
 });
 
@@ -216,13 +238,14 @@ function endGame() {
         }
     }
     endScore.textContent = `本局积分：${score}`;
+    setPause(false);
 }
 
 restartBtn.onclick = function() {
     resetGame();
 };
 menuBtn.onclick = function() {
-    window.location.reload();
+    window.location.href = 'menu.html';
 };
 
 // 初始化
