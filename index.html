@@ -19,7 +19,13 @@
         <div class="tetris-title">
             <span>T</span><span>E</span><span>T</span><span>R</span><span>I</span><span>S</span>
         </div>
+        <div class="difficulty-options">
+            <div class="difficulty-option easy selected" data-difficulty="easy">简单</div>
+            <div class="difficulty-option normal" data-difficulty="normal">普通</div>
+            <div class="difficulty-option hard" data-difficulty="hard">困难</div>
+        </div>
         <button id="start-btn">开始游戏</button>
+        <button id="rules-btn" class="rules-btn">规则</button>
     </div>
     <!-- 游戏主界面 -->
     <div id="main-container" style="display:none;">
@@ -27,13 +33,17 @@
             <div id="score-panel">分数：<span id="score">0</span></div>
             <div id="level-panel">等级：<span id="level">1</span></div>
             <div id="lines-panel">消除行数：<span id="lines">0</span></div>
+            <div id="difficulty-panel">难度：<span id="difficulty">简单</span></div>
         </div>
         <div class="game-area">
             <canvas id="tetris" width="300" height="600"></canvas>
             <div class="side-panel">
                 <div class="next-piece">
-                    <div class="panel-title">下一个</div>
+                    <div class="next-piece-title">下一个</div>
                     <canvas id="next-piece" width="100" height="100"></canvas>
+                </div>
+                <div class="game-info">
+                    <!-- ... existing code ... -->
                 </div>
             </div>
         </div>
@@ -58,6 +68,46 @@
         <button id="restart-btn">再来一局</button>
         <button id="menu-btn">返回菜单</button>
     </div>
+    <div id="pause-menu" class="menu-overlay" style="display: none;">
+        <div class="pause-menu-container">
+            <button id="resume-btn" class="menu-btn">继续游戏</button>
+            <button id="quit-btn" class="menu-btn">退出游戏</button>
+        </div>
+    </div>
+    <!-- 规则界面 -->
+    <div id="rules-menu" class="menu-overlay" style="display: none;">
+        <div class="rules-container">
+            <h2>游戏规则</h2>
+            <div class="rules-content">
+                <h3>基本规则：</h3>
+                <ul>
+                    <li>使用方向键控制方块移动和旋转</li>
+                    <li>← → 键左右移动方块</li>
+                    <li>↑ 键旋转方块</li>
+                    <li>↓ 键加速下落</li>
+                    <li>在0.6秒内连续按3次↓键可以直接下落到底部</li>
+                    <li>空格键暂停游戏</li>
+                </ul>
+
+                <h3>难度说明：</h3>
+                <ul>
+                    <li>简单模式：适合新手，下落速度较慢</li>
+                    <li>普通模式：标准难度，速度适中</li>
+                    <li>困难模式：高难度，下落速度快</li>
+                </ul>
+
+                <h3>星级评定：</h3>
+                <ul>
+                    <li>★☆☆☆☆ - 消除10-19行</li>
+                    <li>★★☆☆☆ - 消除20-29行</li>
+                    <li>★★★☆☆ - 消除30-39行</li>
+                    <li>★★★★☆ - 消除40-49行</li>
+                    <li>★★★★★ - 消除50行以上</li>
+                </ul>
+            </div>
+            <button id="close-rules-btn" class="menu-btn">返回</button>
+        </div>
+    </div>
     <script src="game.js"></script>
     <script>
         // 生成一个随机浅色
@@ -76,6 +126,21 @@
             }
         }
 
+        // 难度选择
+        let selectedDifficulty = 'easy';
+        
+        function setDifficulty(difficulty) {
+            selectedDifficulty = difficulty;
+            document.querySelectorAll('.difficulty-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`.difficulty-option[data-difficulty="${difficulty}"]`).classList.add('selected');
+        }
+
+        document.querySelector('.difficulty-option').onclick = () => setDifficulty('easy');
+        document.querySelector('.difficulty-option[data-difficulty="normal"]').onclick = () => setDifficulty('normal');
+        document.querySelector('.difficulty-option[data-difficulty="hard"]').onclick = () => setDifficulty('hard');
+
         // 开始游戏
         function startGame() {
             setRandomBgColor();
@@ -86,12 +151,10 @@
             // 在移动端调整画布大小
             if (isMobile) {
                 const canvas = document.getElementById('tetris');
-                canvas.height = 480; // 减少3行，原来是600px（20行），现在是480px（16行）
+                canvas.height = 480;
             }
             
-            if (typeof initGame === 'function') {
-                initGame();
-            }
+            resetGame(selectedDifficulty);
         }
 
         // 返回菜单
@@ -112,7 +175,10 @@
         // 绑定按钮事件
         document.getElementById('start-btn').onclick = startGame;
         document.getElementById('menu-btn').onclick = backToMenu;
-        document.getElementById('restart-btn').onclick = startGame;
+        document.getElementById('restart-btn').onclick = () => {
+            startGame();
+            setMainBorderRandomColor();
+        };
     </script>
     <script>
         // 检测是否为移动设备

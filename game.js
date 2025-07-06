@@ -1,3 +1,21 @@
+// 在文件开头添加缩放设置函数
+function setInitialZoom() {
+    // 检查是否为移动设备
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    // 仅在非移动设备上设置缩放
+    if (!isMobile) {
+        // 设置页面缩放为98%
+        document.body.style.zoom = "98%";
+        // 对于不支持 zoom 属性的浏览器，使用 transform 缩放
+        document.body.style.transform = "scale(0.98)";
+        document.body.style.transformOrigin = "center top";
+    }
+}
+
+// 在页面加载完成后调用缩放设置
+window.addEventListener('load', setInitialZoom);
+
 // 俄罗斯方块升级版网页版
 const COLS = 10;
 const ROWS = 20;
@@ -52,23 +70,52 @@ let lastColorIndex = -1; // 记录上一个方块的颜色索引
 let gameLoop = null;
 let currentPiece = null;
 let nextPieceBlock = null;
+let currentDifficulty = 'easy'; // 默认简单难度
+let lastDownPress = 0;  // 记录上次按下向下键的时间
+let downPressCount = 0;  // 记录连续按下次数
+
+const DIFFICULTY_SETTINGS = {
+    easy: {
+        initialSpeed: 600,     // 初始速度更快
+        speedDecrease: 21,     // 保持不变
+        minSpeed: 280,         // 保持不变
+        linesPerLevel: 6,      // 保持不变
+        name: "简单"
+    },
+    normal: {
+        initialSpeed: 400,     // 初始速度更快
+        speedDecrease: 35,     // 保持不变
+        minSpeed: 175,         // 保持不变
+        linesPerLevel: 5,      // 保持不变
+        name: "普通"
+    },
+    hard: {
+        initialSpeed: 250,     // 初始速度更快
+        speedDecrease: 49,     // 保持不变
+        minSpeed: 105,         // 保持不变
+        linesPerLevel: 4,      // 保持不变
+        name: "困难"
+    }
+};
 
 // 设置画布大小
 canvas.width = COLS * BLOCK_SIZE;
 canvas.height = ROWS * BLOCK_SIZE;
 
 function getDropInterval(level) {
-    // 指数级增加难度
-    return Math.max(800 - Math.pow(level - 1, 1.5) * 60, 10);
+    const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+    const speed = settings.initialSpeed - (level - 1) * settings.speedDecrease;
+    return Math.max(speed, settings.minSpeed);
 }
 
-function resetGame() {
+function resetGame(difficulty = 'easy') {
+    currentDifficulty = difficulty;
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     score = 0;
     gameOver = false;
     nextPieceBlock = randomPiece();
     current = randomPiece();
-    current.y = -2; // 调整初始位置更靠近顶部
+    current.y = -2;
     current.hasGeneratedNext = false;
     updateScore();
     endScreen.style.display = 'none';
@@ -82,6 +129,7 @@ function resetGame() {
     setPause(false);
     drawNextPiece();
     document.getElementById('lines').textContent = '0';
+    document.getElementById('difficulty').textContent = DIFFICULTY_SETTINGS[currentDifficulty].name;
 }
 
 // 初始化游戏，但不开始
@@ -225,29 +273,27 @@ function draw() {
 function clearLines() {
     let lines = 0;
     
-    // 直接消除满行
     for (let i = ROWS - 1; i >= 0; i--) {
         if (board[i].every(cell => cell)) {
             board.splice(i, 1);
             board.unshift(Array(COLS).fill(0));
             lines++;
-            i++; // 因为删除了一行，所以需要重新检查当前位置
+            i++;
         }
     }
     
     if (lines > 0) {
-        // 根据同时消除的行数给予额外奖励分数
         const baseScore = SCORE_PER_LINE;
-        const combo = [1, 2.5, 4, 6]; // 1行=1倍，2行=2.5倍，3行=4倍，4行=6倍
-        const levelMultiplier = 1 + (level - 1) * 0.2; // 等级越高分数越多
-        score += Math.floor(baseScore * combo[lines - 1] * lines * levelMultiplier);
+        const combo = [1, 2.5, 4, 6];
+        score += Math.floor(baseScore * combo[lines - 1] * lines);
         
         updateScore();
         linesCleared += lines;
         document.getElementById('lines').textContent = linesCleared;
         
-        // 每3行提升一级
-        let newLevel = Math.floor(linesCleared / 3) + 1;
+        // 根据当前难度设置确定升级所需行数
+        const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+        let newLevel = Math.floor(linesCleared / settings.linesPerLevel) + 1;
         if (newLevel > level) {
             level = newLevel;
             document.getElementById('level').textContent = level;
@@ -255,15 +301,13 @@ function clearLines() {
             if (dropTimer) clearInterval(dropTimer);
             dropTimer = setInterval(tick, dropInterval);
             
-            // 显示等级提升效果
             const levelPanel = document.getElementById('level-panel');
             levelPanel.style.animation = 'none';
-            levelPanel.offsetHeight; // 触发重绘
+            levelPanel.offsetHeight;
             levelPanel.style.animation = 'levelUp 0.5s';
         }
         return true;
     }
-    
     return false;
 }
 
@@ -334,9 +378,25 @@ document.addEventListener('keydown', e => {
         return;
     }
     if (paused || gameOver) return;
+    
     if (e.key === 'ArrowLeft') move(-1, 0);
     else if (e.key === 'ArrowRight') move(1, 0);
-    else if (e.key === 'ArrowDown') move(0, 1);
+    else if (e.key === 'ArrowDown') {
+        const now = Date.now();
+        if (now - lastDownPress <= 600) { // 0.6秒内按下
+            downPressCount++;
+            if (downPressCount >= 3) { // 连续按下3次
+                hardDrop();  // 直接掉落到底部
+                downPressCount = 0;  // 重置计数
+            } else {
+                move(0, 1);
+            }
+        } else {
+            downPressCount = 1;  // 重新开始计数
+            move(0, 1);
+        }
+        lastDownPress = now;  // 更新时间
+    }
     else if (e.key === 'ArrowUp') {
         tryRotate(current);
         draw();
@@ -391,6 +451,21 @@ function tick() {
     }
 }
 
+// 恢复暂停按钮点击事件
+pauseBtn.onclick = function() {
+    setPause(!paused);
+};
+
+// 添加暂停菜单按钮事件监听
+document.getElementById('resume-btn').addEventListener('click', () => {
+    setPause(false);
+});
+
+document.getElementById('quit-btn').addEventListener('click', () => {
+    // 直接跳转到主菜单（index.html）
+    window.location.href = 'index.html';
+});
+
 function setPause(state) {
     paused = state;
     if (dropTimer) {
@@ -400,22 +475,24 @@ function setPause(state) {
     if (paused) {
         pauseIcon.innerHTML = '&#9654;'; // ▶
         pauseBtn.classList.add('paused');
+        document.getElementById('pause-menu').style.display = 'flex';
     } else {
         pauseIcon.innerHTML = '&#10073;&#10073;'; // ||
         pauseBtn.classList.remove('paused');
+        document.getElementById('pause-menu').style.display = 'none';
         if (!gameOver && !dropTimer) dropTimer = setInterval(tick, dropInterval);
     }
 }
 
-pauseBtn.onclick = function() {
-    setPause(!paused);
-};
-
 function getStarCount(score) {
-    if (score < 10) return 0;
-    if (score < 20) return 1;
-    if (score < 30) return 2;
-    return 3;
+    // 修改星星评级机制
+    // 根据消除的行数来评定星级
+    if (linesCleared < 10) return 0;      // 0星：消除不到10行
+    else if (linesCleared < 20) return 1;  // 1星：消除10-19行
+    else if (linesCleared < 30) return 2;  // 2星：消除20-29行
+    else if (linesCleared < 40) return 3;  // 3星：消除30-39行
+    else if (linesCleared < 50) return 4;  // 4星：消除40-49行
+    else return 5;                         // 5星：消除50行以上
 }
 
 function endGame() {
@@ -424,33 +501,40 @@ function endGame() {
     document.getElementById('main-container').style.display = 'none';
     endScreen.style.display = 'flex';
     let stars = getStarCount(score);
-    if (score < 10) {
-        endTitle.textContent = '游戏失败';
-        starContainer.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
-            const star = document.createElement('span');
-            star.className = 'star';
-            star.style.filter = 'grayscale(1) opacity(0.4)';
-            starContainer.appendChild(star);
-        }
+    
+    // 更新结束界面的标题和星星显示
+    if (linesCleared < 10) {
+        endTitle.textContent = '继续加油';
+    } else if (linesCleared < 20) {
+        endTitle.textContent = '有待提高';
+    } else if (linesCleared < 30) {
+        endTitle.textContent = '表现不错';
+    } else if (linesCleared < 40) {
+        endTitle.textContent = '很棒';
+    } else if (linesCleared < 50) {
+        endTitle.textContent = '太厉害了';
     } else {
-        endTitle.textContent = '游戏胜利';
-        starContainer.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
-            const star = document.createElement('span');
-            star.className = 'star';
-            if (i >= stars) {
-                star.style.filter = 'grayscale(1) opacity(0.4)';
-            }
-            starContainer.appendChild(star);
-        }
+        endTitle.textContent = '完美游戏';
     }
-    endScore.textContent = `本局积分：${score}`;
+
+    // 清空并重新生成星星
+    starContainer.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+        const star = document.createElement('span');
+        star.className = 'star';
+        if (i >= stars) {
+            star.style.filter = 'grayscale(1) opacity(0.4)';
+        }
+        starContainer.appendChild(star);
+    }
+    
+    endScore.textContent = `消除行数：${linesCleared}`;
     setPause(false);
+    
     // 保存最高纪录
     let best = localStorage.getItem('tetris_best') || 0;
-    if (score > best) {
-        localStorage.setItem('tetris_best', score);
+    if (linesCleared > best) {
+        localStorage.setItem('tetris_best', linesCleared);
     }
 }
 
@@ -494,14 +578,18 @@ function drawNextPiece() {
     }
     
     nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-    nextCtx.fillStyle = '#fff';
-    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
     
-    const blockSize = 20;
+    // 调整方块大小
+    const blockSize = 25; // 减小方块大小
     const size = blockSize - 1;
-    const offsetX = (nextCanvas.width - nextPieceBlock.shape[0].length * blockSize) / 2;
-    const offsetY = (nextCanvas.height - nextPieceBlock.shape.length * blockSize) / 2;
     
+    // 计算预览区域中心位置
+    const pieceWidth = nextPieceBlock.shape[0].length * blockSize;
+    const pieceHeight = nextPieceBlock.shape.length * blockSize;
+    const offsetX = (nextCanvas.width - pieceWidth) / 2;
+    const offsetY = (nextCanvas.height - pieceHeight) / 2;
+    
+    // 绘制方块
     for (let i = 0; i < nextPieceBlock.shape.length; i++) {
         for (let j = 0; j < nextPieceBlock.shape[i].length; j++) {
             if (nextPieceBlock.shape[i][j]) {
@@ -514,45 +602,12 @@ function drawNextPiece() {
                 
                 // 绘制边框
                 nextCtx.beginPath();
-                nextCtx.strokeStyle = '#000000';
+                nextCtx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
                 nextCtx.lineWidth = 0.5;
-                
-                // 右边框
-                nextCtx.moveTo(x + size, y);
-                nextCtx.lineTo(x + size, y + size);
-                
-                // 底边框
-                nextCtx.moveTo(x, y + size);
-                nextCtx.lineTo(x + size, y + size);
-                
-                nextCtx.stroke();
+                nextCtx.strokeRect(x, y, size, size);
             }
         }
     }
-    
-    // 为预览区域的第一行和第一列添加边框
-    nextCtx.beginPath();
-    nextCtx.strokeStyle = '#000000';
-    nextCtx.lineWidth = 0.5;
-    
-    // 绘制整个预览区域的左边框
-    for (let i = 0; i < nextPieceBlock.shape.length; i++) {
-        for (let j = 0; j < nextPieceBlock.shape[i].length; j++) {
-            if (nextPieceBlock.shape[i][j]) {
-                const x = offsetX + j * blockSize;
-                const y = offsetY + i * blockSize;
-                if (j === 0 || !nextPieceBlock.shape[i][j-1]) {
-                    nextCtx.moveTo(x, y);
-                    nextCtx.lineTo(x, y + size);
-                }
-                if (i === 0 || !nextPieceBlock.shape[i-1][j]) {
-                    nextCtx.moveTo(x, y);
-                    nextCtx.lineTo(x + size, y);
-                }
-            }
-        }
-    }
-    nextCtx.stroke();
 }
 
 // 添加CSS动画
@@ -663,3 +718,12 @@ if (document.getElementById('mobile-controls')) {
         lastTap = now;
     });
 }
+
+// 添加规则按钮事件监听
+document.getElementById('rules-btn')?.addEventListener('click', () => {
+    document.getElementById('rules-menu').style.display = 'flex';
+});
+
+document.getElementById('close-rules-btn')?.addEventListener('click', () => {
+    document.getElementById('rules-menu').style.display = 'none';
+});
