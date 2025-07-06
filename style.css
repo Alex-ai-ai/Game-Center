@@ -288,35 +288,105 @@ body.mobile .mobile-only {
 @media (max-width: 768px) {
     #main-container {
         padding: 10px;
+        padding-top: env(safe-area-inset-top, 20px); /* 适配刘海屏 */
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .game-stats {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        margin: -10px -10px 10px -10px;
+        flex-direction: row;
+        justify-content: space-around;
+        font-size: 14px;
     }
     
     .game-area {
         flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
     }
     
     #tetris {
         width: 100%;
         height: auto;
-        max-width: 400px;
+        max-width: 350px;
+        margin: 0 auto;
     }
     
     .side-panel {
         margin-top: 10px;
         margin-left: 0;
-    }
-    
-    .game-stats {
-        flex-direction: row;
-        justify-content: space-around;
-        margin-bottom: 10px;
-    }
-    
-    #pause-btn {
-        margin-top: 10px;
+        display: flex;
+        justify-content: center;
     }
     
     .next-piece {
-        margin: 0 auto;
+        margin: 0;
+        transform: scale(0.8);
+    }
+    
+    #pause-btn {
+        position: fixed;
+        top: env(safe-area-inset-top, 20px);
+        right: 10px;
+        z-index: 101;
+        padding: 8px 15px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+    }
+    
+    #mobile-controls {
+        position: fixed;
+        bottom: env(safe-area-inset-bottom, 10px);
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .control-row {
+        margin: 5px 0;
+    }
+    
+    #mobile-controls button {
+        padding: 12px 20px;
+        font-size: 18px;
+    }
+    
+    /* 为控制按钮腾出空间 */
+    #main-container {
+        padding-bottom: 200px;
+    }
+    
+    /* 优化游戏统计信息显示 */
+    .game-stats > div {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 5px 10px;
+        border-radius: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* 适配刘海屏 */
+@supports (padding-top: env(safe-area-inset-top)) {
+    @media (max-width: 768px) {
+        #main-container {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: calc(200px + env(safe-area-inset-bottom));
+        }
+        
+        #mobile-controls {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
     }
 }
 
