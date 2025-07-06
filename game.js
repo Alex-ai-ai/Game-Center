@@ -13,6 +13,7 @@ const starContainer = document.getElementById('star-container');
 const restartBtn = document.getElementById('restart-btn');
 const menuBtn = document.getElementById('menu-btn');
 const pauseBtn = document.getElementById('pause-btn');
+const pauseIcon = document.getElementById('pause-icon');
 
 const COLORS = [
     '#00ffff', // I
@@ -168,11 +169,11 @@ function hardDrop() {
 function setPause(state) {
     paused = state;
     if (paused) {
-        pauseBtn.textContent = '继续';
+        pauseIcon.innerHTML = '&#9654;'; // ▶
         pauseBtn.classList.add('paused');
         if (dropTimer) clearInterval(dropTimer);
     } else {
-        pauseBtn.textContent = '暂停';
+        pauseIcon.innerHTML = '&#10073;&#10073;'; // ||
         pauseBtn.classList.remove('paused');
         if (!gameOver) dropTimer = setInterval(tick, 500);
     }
