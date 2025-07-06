@@ -328,7 +328,7 @@ body.mobile .mobile-only {
         margin: 0;
         padding: 0;
         min-height: 100vh;
-        min-height: -webkit-fill-available; /* 解决iOS Safari 问题 */
+        min-height: -webkit-fill-available;
         overflow: hidden;
         position: fixed;
         width: 100%;
@@ -339,8 +339,8 @@ body.mobile .mobile-only {
         padding: 0;
         margin: 0;
         height: 100vh;
-        height: -webkit-fill-available; /* 解决iOS Safari 问题 */
-        transform: scale(0.75); /* 进一步缩小以确保完全显示 */
+        height: -webkit-fill-available;
+        transform: scale(0.7); /* 进一步缩小以显示更多内容 */
         transform-origin: top center;
         overflow: hidden;
         display: flex;
@@ -349,8 +349,10 @@ body.mobile .mobile-only {
 
     #tetris {
         width: 240px;
-        height: 460px; /* 减小高度以确保完全显示 */
+        height: 440px; /* 减小游戏区域高度 */
         margin: 0 auto;
+        margin-top: 35px; /* 增加顶部间距 */
+        border: 1px solid rgba(255, 255, 255, 0.1); /* 添加边框以便于识别游戏区域 */
     }
 
     /* 游戏区域布局调整 */
@@ -359,9 +361,11 @@ body.mobile .mobile-only {
         flex-direction: column;
         align-items: center;
         margin: 0;
-        padding-bottom: 110px; /* 增加底部空间 */
-        height: calc(100vh - 110px); /* 调整可视区域高度 */
-        overflow: hidden;
+        padding-bottom: 160px; /* 增加底部空间 */
+        min-height: calc(100vh - 160px);
+        overflow: visible; /* 允许内容溢出以显示完整游戏区域 */
+        position: relative; /* 添加相对定位 */
+        z-index: 1; /* 确保游戏区域在控制按钮之上 */
     }
 
     /* 游戏信息面板调整 */
@@ -370,7 +374,7 @@ body.mobile .mobile-only {
         display: flex;
         justify-content: space-around;
         padding: 2px;
-        margin: 2px 0;
+        margin: 0;
         font-size: 12px;
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(5px);
@@ -378,40 +382,41 @@ body.mobile .mobile-only {
         top: 0;
         left: 0;
         z-index: 1000;
+        height: 30px;
+        align-items: center;
     }
 
     /* 控制按钮容器 */
     #mobile-controls {
         position: fixed;
-        bottom: 15px; /* 增加底部距离 */
-        left: 50%;
-        transform: translateX(-50%);
-        width: 260px; /* 减小宽度 */
-        padding: 5px;
+        bottom: 10px;
+        left: 0;
+        width: 100%;
+        padding: 8px 0;
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(5px);
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 8px;
-        z-index: 1000;
-        border-radius: 10px;
-        margin: 0 auto;
+        z-index: 2; /* 确保控制按钮在游戏区域之上 */
+        min-height: 110px;
     }
 
     .control-group {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         justify-content: center;
+        align-items: center;
         width: 100%;
-        padding: 0 5px;
-        box-sizing: border-box;
+        max-width: 280px;
+        margin: 0 auto;
     }
 
     .control-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
+        width: 42px;
+        height: 42px;
+        font-size: 18px;
         background: rgba(255, 255, 255, 0.2);
         border: none;
         border-radius: 8px;
@@ -421,32 +426,55 @@ body.mobile .mobile-only {
         align-items: center;
         -webkit-tap-highlight-color: transparent;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 0 4px;
     }
 
     /* 更小屏幕的适配 */
-    @media (max-width: 375px) {
+    @media (max-height: 700px) {
         .game-container {
-            transform: scale(0.72);
+            transform: scale(0.65);
         }
 
         #tetris {
-            width: 220px;
-            height: 440px;
+            height: 420px;
+            margin-top: 30px;
         }
 
         #mobile-controls {
-            width: 240px;
-            bottom: 12px;
+            min-height: 100px;
+            padding: 5px 0;
+        }
+
+        .control-btn {
+            width: 38px;
+            height: 38px;
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .game-container {
+            transform: scale(0.62);
+        }
+
+        #tetris {
+            height: 400px;
+        }
+
+        #mobile-controls {
+            padding: 5px 0;
         }
 
         .control-group {
             gap: 8px;
+            max-width: 260px;
         }
 
         .control-btn {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             font-size: 15px;
+            margin: 0 2px;
         }
     }
 
@@ -465,11 +493,24 @@ body.mobile .mobile-only {
         font-size: 12px;
     }
 
-    /* 防止iOS橡皮筋效果 */
+    /* 防止iOS橡皮筋效果和确保内容不会被底部工具栏遮挡 */
     html {
         position: fixed;
         height: 100%;
         overflow: hidden;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* 添加游戏区域底部渐变效果，使边界更清晰 */
+    .game-area::after {
+        content: '';
+        position: absolute;
+        bottom: 160px; /* 与padding-bottom相同 */
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+        pointer-events: none;
     }
 }
 
@@ -959,6 +1000,7 @@ html {
             width: 36px;
             height: 36px;
             font-size: 16px;
+            margin: 0 3px;
         }
 
         .game-stats {
