@@ -62,6 +62,23 @@ function resetGame() {
     setPause(false);
 }
 
+// 初始化游戏，但不开始
+function initGame() {
+    board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+    score = 0;
+    gameOver = false;
+    current = randomPiece();
+    updateScore();
+    linesCleared = 0;
+    level = 1;
+    dropInterval = getDropInterval(level);
+    if (dropTimer) clearInterval(dropTimer);
+    draw();
+}
+
+// 在页面加载时初始化游戏
+initGame();
+
 function randomPiece() {
     const idx = Math.floor(Math.random() * SHAPES.length);
     return {
@@ -276,6 +293,3 @@ restartBtn.onclick = function() {
 menuBtn.onclick = function() {
     window.location.href = 'menu.html';
 };
-
-// 初始化
-resetGame();

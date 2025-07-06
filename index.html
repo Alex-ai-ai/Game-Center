@@ -8,8 +8,10 @@
 <body>
     <!-- 主菜单 -->
     <div id="menu-container">
-        <h1>俄罗斯方块升级版</h1>
         <div id="best-score-panel">最高纪录：<span id="best-score">0</span></div>
+        <div class="tetris-title">
+            <span>T</span><span>E</span><span>T</span><span>R</span><span>I</span><span>S</span>
+        </div>
         <button id="start-btn">开始游戏</button>
     </div>
     <!-- 游戏主界面 -->
@@ -56,18 +58,20 @@
             var main = document.getElementById('main-container');
             if(main) main.style.border = `2px solid ${color}`;
         }
-        // “开始游戏”按钮
+        // "开始游戏"按钮
         document.getElementById('start-btn').onclick = function() {
             setMainBgRandomColor();
             document.getElementById('menu-container').style.display = 'none';
             document.getElementById('main-container').style.display = '';
-            if(typeof resetGame === 'function') resetGame();
+            resetGame(); // 这里会启动游戏计时器
         };
-        // “返回菜单”按钮
+        // "返回菜单"按钮
         document.getElementById('menu-btn').onclick = function() {
             document.getElementById('main-container').style.display = 'none';
             document.getElementById('end-screen').style.display = 'none';
             document.getElementById('menu-container').style.display = '';
+            if (dropTimer) clearInterval(dropTimer); // 清除游戏计时器
+            initGame(); // 重新初始化游戏，但不开始
             // 重新读取最高纪录
             document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
         };
