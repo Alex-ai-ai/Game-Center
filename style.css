@@ -233,3 +233,94 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
 }
+
+/* 移动端样式 */
+.mobile-only {
+    display: none;
+}
+
+body.mobile .mobile-only {
+    display: block;
+}
+
+#mobile-controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.control-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+#mobile-controls button {
+    padding: 15px 25px;
+    font-size: 20px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#mobile-controls button:active {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateY(2px);
+}
+
+#rotate-btn {
+    width: 120px;
+}
+
+#left-btn, #right-btn, #down-btn {
+    width: 80px;
+}
+
+#drop-btn {
+    width: 200px;
+}
+
+/* 移动端响应式布局 */
+@media (max-width: 768px) {
+    #main-container {
+        padding: 10px;
+    }
+    
+    .game-area {
+        flex-direction: column;
+    }
+    
+    #tetris {
+        width: 100%;
+        height: auto;
+        max-width: 400px;
+    }
+    
+    .side-panel {
+        margin-top: 10px;
+        margin-left: 0;
+    }
+    
+    .game-stats {
+        flex-direction: row;
+        justify-content: space-around;
+        margin-bottom: 10px;
+    }
+    
+    #pause-btn {
+        margin-top: 10px;
+    }
+    
+    .next-piece {
+        margin: 0 auto;
+    }
+}
+
+/* 禁用移动端双击缩放 */
+* {
+    touch-action: manipulation;
+}

@@ -58,8 +58,8 @@ canvas.width = COLS * BLOCK_SIZE;
 canvas.height = ROWS * BLOCK_SIZE;
 
 function getDropInterval(level) {
-    // 每升一级减少50ms，最低10ms
-    return Math.max(500 - (level - 1) * 50, 10);
+    // 指数级增加难度
+    return Math.max(800 - Math.pow(level - 1, 1.5) * 60, 10);
 }
 
 function resetGame() {
@@ -236,16 +236,30 @@ function clearLines() {
     }
     
     if (lines > 0) {
-        score += lines * 2;
+        // 根据同时消除的行数给予额外奖励分数
+        const baseScore = SCORE_PER_LINE;
+        const combo = [1, 2.5, 4, 6]; // 1行=1倍，2行=2.5倍，3行=4倍，4行=6倍
+        const levelMultiplier = 1 + (level - 1) * 0.2; // 等级越高分数越多
+        score += Math.floor(baseScore * combo[lines - 1] * lines * levelMultiplier);
+        
         updateScore();
         linesCleared += lines;
         document.getElementById('lines').textContent = linesCleared;
-        let newLevel = Math.floor(linesCleared / 5) + 1;
+        
+        // 每3行提升一级
+        let newLevel = Math.floor(linesCleared / 3) + 1;
         if (newLevel > level) {
             level = newLevel;
+            document.getElementById('level').textContent = level;
             dropInterval = getDropInterval(level);
             if (dropTimer) clearInterval(dropTimer);
             dropTimer = setInterval(tick, dropInterval);
+            
+            // 显示等级提升效果
+            const levelPanel = document.getElementById('level-panel');
+            levelPanel.style.animation = 'none';
+            levelPanel.offsetHeight; // 触发重绘
+            levelPanel.style.animation = 'levelUp 0.5s';
         }
         return true;
     }
@@ -539,4 +553,113 @@ function drawNextPiece() {
         }
     }
     nextCtx.stroke();
+}
+
+// 添加CSS动画
+const style = document.createElement('style');
+style.textContent = `
+@keyframes levelUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+`;
+document.head.appendChild(style);
+
+// 移动端控制
+if (document.getElementById('mobile-controls')) {
+    // 旋转按钮
+    document.getElementById('rotate-btn').addEventListener('click', () => {
+        if (!paused && !gameOver) {
+            tryRotate(current);
+            draw();
+        }
+    });
+
+    // 左移按钮
+    document.getElementById('left-btn').addEventListener('click', () => {
+        if (!paused && !gameOver) {
+            move(-1, 0);
+        }
+    });
+
+    // 右移按钮
+    document.getElementById('right-btn').addEventListener('click', () => {
+        if (!paused && !gameOver) {
+            move(1, 0);
+        }
+    });
+
+    // 下移按钮
+    document.getElementById('down-btn').addEventListener('click', () => {
+        if (!paused && !gameOver) {
+            move(0, 1);
+        }
+    });
+
+    // 直接下落按钮
+    document.getElementById('drop-btn').addEventListener('click', () => {
+        if (!paused && !gameOver) {
+            hardDrop();
+        }
+    });
+
+    // 添加触摸滑动支持
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let lastTouchMove = 0;
+    const SWIPE_THRESHOLD = 30;
+    const SWIPE_TIMEOUT = 200;
+
+    canvas.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        lastTouchMove = Date.now();
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+        if (paused || gameOver) return;
+        
+        const now = Date.now();
+        if (now - lastTouchMove < SWIPE_TIMEOUT) return;
+        
+        const touchEndX = e.touches[0].clientX;
+        const touchEndY = e.touches[0].clientY;
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+            if (deltaX > 0) {
+                move(1, 0);
+            } else {
+                move(-1, 0);
+            }
+            touchStartX = touchEndX;
+            lastTouchMove = now;
+        }
+
+        if (deltaY > SWIPE_THRESHOLD) {
+            move(0, 1);
+            touchStartY = touchEndY;
+            lastTouchMove = now;
+        }
+
+        e.preventDefault();
+    });
+
+    // 双击旋转
+    let lastTap = 0;
+    canvas.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        const DOUBLE_TAP_DELAY = 300;
+        
+        if (now - lastTap < DOUBLE_TAP_DELAY) {
+            if (!paused && !gameOver) {
+                tryRotate(current);
+                draw();
+            }
+            e.preventDefault();
+        }
+        lastTap = now;
+    });
 }
