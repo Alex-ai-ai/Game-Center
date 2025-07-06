@@ -168,14 +168,17 @@ function hardDrop() {
 
 function setPause(state) {
     paused = state;
+    if (dropTimer) {
+        clearInterval(dropTimer);
+        dropTimer = null;
+    }
     if (paused) {
         pauseIcon.innerHTML = '&#9654;'; // ▶
         pauseBtn.classList.add('paused');
-        if (dropTimer) clearInterval(dropTimer);
     } else {
         pauseIcon.innerHTML = '&#10073;&#10073;'; // ||
         pauseBtn.classList.remove('paused');
-        if (!gameOver) dropTimer = setInterval(tick, 500);
+        if (!gameOver && !dropTimer) dropTimer = setInterval(tick, 500);
     }
 }
 
@@ -240,6 +243,11 @@ function endGame() {
     }
     endScore.textContent = `本局积分：${score}`;
     setPause(false);
+    // 保存最高纪录
+    let best = localStorage.getItem('tetris_best') || 0;
+    if (score > best) {
+        localStorage.setItem('tetris_best', score);
+    }
 }
 
 restartBtn.onclick = function() {
