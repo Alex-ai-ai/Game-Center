@@ -28,13 +28,42 @@
     </div>
     <script src="game.js"></script>
     <script>
-        // 主菜单逻辑
+        // 生成一个随机浅色
+        function getRandomPastelColor() {
+            const h = Math.floor(Math.random() * 360);
+            const s = 60 + Math.random() * 40;
+            const l = 80 + Math.random() * 10;
+            return `hsl(${h},${s}%,${l}%)`;
+        }
+        // 设置主界面大背景为随机浅色
+        function setMainBgRandomColor() {
+            var color = getRandomPastelColor();
+            var main = document.getElementById('main-container');
+            if(main) main.style.background = color;
+        }
+    </script>
+    <script>
+        // 生成一个随机浅色
+        function getRandomPastelColor() {
+            const h = Math.floor(Math.random() * 360);
+            const s = 60 + Math.random() * 40;
+            const l = 80 + Math.random() * 10;
+            return `hsl(${h},${s}%,${l}%)`;
+        }
+        // 只设置主界面大外框边框为随机浅色
+        function setMainBorderRandomColor() {
+            var color = getRandomPastelColor();
+            var main = document.getElementById('main-container');
+            if(main) main.style.border = `2px solid ${color}`;
+        }
+        // “开始游戏”按钮
         document.getElementById('start-btn').onclick = function() {
+            setMainBgRandomColor();
             document.getElementById('menu-container').style.display = 'none';
             document.getElementById('main-container').style.display = '';
             if(typeof resetGame === 'function') resetGame();
         };
-        // 返回菜单按钮逻辑
+        // “返回菜单”按钮
         document.getElementById('menu-btn').onclick = function() {
             document.getElementById('main-container').style.display = 'none';
             document.getElementById('end-screen').style.display = 'none';
@@ -50,4 +79,4 @@
         document.getElementById('end-screen').style.display = 'none';
     </script>
 </body>
-</html> 
+</html>
