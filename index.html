@@ -39,6 +39,8 @@
             document.getElementById('main-container').style.display = 'none';
             document.getElementById('end-screen').style.display = 'none';
             document.getElementById('menu-container').style.display = '';
+            // 重新读取最高纪录
+            document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
         };
         // 显示最高纪录
         document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
