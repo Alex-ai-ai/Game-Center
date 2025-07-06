@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>俄罗斯方块升级版 - 主菜单</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="menu-container">
+        <h1>俄罗斯方块升级版</h1>
+        <div id="best-score-panel">最高纪录：<span id="best-score">0</span></div>
+        <button id="start-btn">开始游戏</button>
+    </div>
+    <script>
+        document.getElementById('start-btn').onclick = function() {
+            window.location.href = 'index.html';
+        };
+        // 读取最高纪录
+        document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
+    </script>
+</body>
+</html> 
