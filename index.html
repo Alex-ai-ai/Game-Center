@@ -6,6 +6,11 @@
     <title>俄罗斯方块升级版</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <!-- 主菜单 -->
@@ -62,57 +67,52 @@
             const l = 80 + Math.random() * 10;
             return `hsl(${h},${s}%,${l}%)`;
         }
-        // 设置主界面大背景为随机浅色
-        function setMainBgRandomColor() {
-            var color = getRandomPastelColor();
-            var main = document.getElementById('main-container');
-            if(main) main.style.background = color;
+
+        // 设置随机背景色
+        function setRandomBgColor() {
+            if (!isMobile) {  // 只在PC端设置随机背景
+                const color = getRandomPastelColor();
+                document.documentElement.style.setProperty('--bg-color', color);
+            }
         }
-    </script>
-    <script>
-        // 生成一个随机浅色
-        function getRandomPastelColor() {
-            const h = Math.floor(Math.random() * 360);
-            const s = 60 + Math.random() * 40;
-            const l = 80 + Math.random() * 10;
-            return `hsl(${h},${s}%,${l}%)`;
-        }
-        // 只设置主界面大外框边框为随机浅色
-        function setMainBorderRandomColor() {
-            var color = getRandomPastelColor();
-            var main = document.getElementById('main-container');
-            if(main) main.style.border = `2px solid ${color}`;
-        }
+
+        // 开始游戏
         function startGame() {
-            setMainBgRandomColor();
+            setRandomBgColor();
             document.getElementById('menu-container').style.display = 'none';
             document.getElementById('main-container').style.display = '';
-            resetGame(); // 这里会启动游戏计时器
-        }
-        // 添加键盘事件监听
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && document.getElementById('menu-container').style.display !== 'none') {
-                startGame();
+            document.getElementById('end-screen').style.display = 'none';
+            
+            // 在移动端调整画布大小
+            if (isMobile) {
+                const canvas = document.getElementById('tetris');
+                canvas.height = 480; // 减少3行，原来是600px（20行），现在是480px（16行）
             }
-        });
-        // "开始游戏"按钮
-        document.getElementById('start-btn').onclick = startGame;
-        // "返回菜单"按钮
-        document.getElementById('menu-btn').onclick = function() {
+            
+            if (typeof initGame === 'function') {
+                initGame();
+            }
+        }
+
+        // 返回菜单
+        function backToMenu() {
+            document.getElementById('menu-container').style.display = '';
             document.getElementById('main-container').style.display = 'none';
             document.getElementById('end-screen').style.display = 'none';
-            document.getElementById('menu-container').style.display = '';
-            if (dropTimer) clearInterval(dropTimer); // 清除游戏计时器
-            initGame(); // 重新初始化游戏，但不开始
-            // 重新读取最高纪录
             document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
-        };
-        // 显示最高纪录
-        document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
-        // 初始只显示主菜单
-        document.getElementById('menu-container').style.display = '';
-        document.getElementById('main-container').style.display = 'none';
-        document.getElementById('end-screen').style.display = 'none';
+            
+            // 恢复画布原始大小
+            const canvas = document.getElementById('tetris');
+            canvas.height = 600;
+        }
+
+        // 页面加载时设置背景色
+        window.addEventListener('load', setRandomBgColor);
+
+        // 绑定按钮事件
+        document.getElementById('start-btn').onclick = startGame;
+        document.getElementById('menu-btn').onclick = backToMenu;
+        document.getElementById('restart-btn').onclick = startGame;
     </script>
     <script>
         // 检测是否为移动设备
