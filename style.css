@@ -10,6 +10,7 @@ body {
 }
 #main-container, #menu-container {
     background: #fff;
+    border: 2px solid #90caf9; /* 默认浅蓝色，JS会动态覆盖main-container */
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.2);
     padding: 32px 32px 24px 32px;
@@ -27,8 +28,8 @@ body {
     margin-bottom: 16px;
 }
 #tetris {
-    background: #111;
-    border: 2px solid #444;
+    background: #fff;              /* 白色背景 */
+    border: 2px solid #90caf9;     /* 固定浅蓝色边框，不变色 */
     border-radius: 8px;
     display: block;
     margin: 0 auto 12px auto;
@@ -99,4 +100,4 @@ body {
 }
 #main-container {
     position: relative;
-} 
+}

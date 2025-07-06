@@ -36,8 +36,16 @@ const SHAPES = [
 
 let board, current, score, gameOver, dropInterval, dropTimer;
 let paused = false;
+let linesCleared = 0; // 新增：累计消除行数
+let level = 1;        // 新增：当前难度等级
+
+function getDropInterval(level) {
+    // 每升一级减少50ms，最低10ms
+    return Math.max(500 - (level - 1) * 50, 10);
+}
 
 function resetGame() {
+    // 每次新局都变色（由index.html的start-btn和restartBtn调用）
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     score = 0;
     gameOver = false;
@@ -45,8 +53,11 @@ function resetGame() {
     updateScore();
     endScreen.style.display = 'none';
     document.getElementById('main-container').style.display = '';
+    linesCleared = 0; // 重置累计行数
+    level = 1;        // 重置等级
+    dropInterval = getDropInterval(level); // 用函数设置初始速度
     if (dropTimer) clearInterval(dropTimer);
-    dropTimer = setInterval(tick, 500);
+    dropTimer = setInterval(tick, dropInterval);
     draw();
     setPause(false);
 }
@@ -98,6 +109,14 @@ function clearLines() {
     if (lines > 0) {
         score += lines * 2;
         updateScore();
+        linesCleared += lines; // 累计消除行数
+        let newLevel = Math.floor(linesCleared / 5) + 1;
+        if (newLevel > level) {
+            level = newLevel;
+            dropInterval = getDropInterval(level);
+            if (dropTimer) clearInterval(dropTimer);
+            dropTimer = setInterval(tick, dropInterval);
+        }
     }
 }
 
@@ -178,7 +197,7 @@ function setPause(state) {
     } else {
         pauseIcon.innerHTML = '&#10073;&#10073;'; // ||
         pauseBtn.classList.remove('paused');
-        if (!gameOver && !dropTimer) dropTimer = setInterval(tick, 500);
+        if (!gameOver && !dropTimer) dropTimer = setInterval(tick, dropInterval);
     }
 }
 
@@ -251,6 +270,7 @@ function endGame() {
 }
 
 restartBtn.onclick = function() {
+    setMainBorderRandomColor(); // 每次再来一局时随机主界面边框色
     resetGame();
 };
 menuBtn.onclick = function() {
@@ -258,4 +278,4 @@ menuBtn.onclick = function() {
 };
 
 // 初始化
-resetGame(); 
+resetGame();
