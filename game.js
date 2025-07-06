@@ -68,8 +68,8 @@ function resetGame() {
     gameOver = false;
     nextPieceBlock = randomPiece();
     current = randomPiece();
-    current.y = -4;
-    current.hasGeneratedNext = false; // 添加标记，用于跟踪是否已生成下一个方块
+    current.y = -2; // 调整初始位置更靠近顶部
+    current.hasGeneratedNext = false;
     updateScore();
     endScreen.style.display = 'none';
     document.getElementById('main-container').style.display = '';
@@ -119,13 +119,14 @@ function collide(piece, x, y) {
                 const newX = x + j;
                 const newY = y + i;
                 
-                // 检查是否超出边界或与其他方块碰撞
+                // 检查是否超出边界
                 if (newX < 0 || newX >= COLS || newY >= ROWS) {
                     return true;
                 }
                 
+                // 检查是否与其他方块碰撞
                 // 只在方块完全进入游戏区域后才检查碰撞
-                if (newY >= 0 && board[newY][newX]) {
+                if (newY >= 0 && board[newY] && board[newY][newX]) {
                     return true;
                 }
             }
@@ -135,40 +136,69 @@ function collide(piece, x, y) {
 }
 
 function merge(piece) {
-    for (let i = 0; i < piece.shape.length; i++) {
-        for (let j = 0; j < piece.shape[i].length; j++) {
-            if (piece.shape[i][j]) {
-                board[piece.y + i][piece.x + j] = piece.color;
+    const shape = piece.shape;
+    for (let i = 0; i < shape.length; i++) {
+        for (let j = 0; j < shape[i].length; j++) {
+            if (shape[i][j]) {
+                const newY = piece.y + i;
+                const newX = piece.x + j;
+                // 确保只在有效范围内合并方块
+                if (newY >= 0 && newY < ROWS && newX >= 0 && newX < COLS) {
+                    board[newY][newX] = piece.color;
+                }
             }
         }
     }
 }
 
 function drawCell(x, y, color) {
-    const size = BLOCK_SIZE - 1;
+    const size = BLOCK_SIZE;
+    
+    // 填充方块背景
     ctx.fillStyle = color;
     ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, size, size);
     
-    // 只绘制右边和底部的边框
+    // 绘制边框 - 使用更细的线条
     ctx.beginPath();
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
     ctx.lineWidth = 0.5;
+    ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, size, size);
     
-    // 右边框
-    ctx.moveTo((x + 1) * BLOCK_SIZE - 1, y * BLOCK_SIZE);
-    ctx.lineTo((x + 1) * BLOCK_SIZE - 1, (y + 1) * BLOCK_SIZE - 1);
+    // 添加更淡的内部阴影效果
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.moveTo(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + size - 2);
+    ctx.lineTo(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + 2);
+    ctx.lineTo(x * BLOCK_SIZE + size - 2, y * BLOCK_SIZE + 2);
+    ctx.stroke();
     
-    // 底边框
-    ctx.moveTo(x * BLOCK_SIZE, (y + 1) * BLOCK_SIZE - 1);
-    ctx.lineTo((x + 1) * BLOCK_SIZE - 1, (y + 1) * BLOCK_SIZE - 1);
-    
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.moveTo(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + size - 2);
+    ctx.lineTo(x * BLOCK_SIZE + size - 2, y * BLOCK_SIZE + size - 2);
+    ctx.lineTo(x * BLOCK_SIZE + size - 2, y * BLOCK_SIZE + 2);
     ctx.stroke();
 }
 
 function draw() {
+    // 清除画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 绘制背景网格
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= ROWS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * BLOCK_SIZE);
+        ctx.lineTo(canvas.width, i * BLOCK_SIZE);
+        ctx.stroke();
+    }
+    for (let j = 0; j <= COLS; j++) {
+        ctx.beginPath();
+        ctx.moveTo(j * BLOCK_SIZE, 0);
+        ctx.lineTo(j * BLOCK_SIZE, canvas.height);
+        ctx.stroke();
+    }
     
     // 绘制已经固定的方块
     for (let i = 0; i < ROWS; i++) {
@@ -179,12 +209,12 @@ function draw() {
         }
     }
     
-    // 绘制当前方块（只有当方块至少部分可见时才绘制）
+    // 绘制当前方块
     if (current) {
         const shape = current.shape;
         for (let i = 0; i < shape.length; i++) {
             for (let j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] && (current.y + i >= -3)) { // 调整可见性判断
+                if (shape[i][j] && (current.y + i >= 0)) {
                     drawCell(current.x + j, current.y + i, current.color);
                 }
             }
@@ -231,6 +261,41 @@ function rotate(shape) {
     return shape[0].map((_, i) => shape.map(row => row[i]).reverse());
 }
 
+function tryRotate(piece) {
+    const newShape = rotate(piece.shape);
+    const kicks = [
+        {x: 0, y: 0},  // 原位置
+        {x: -1, y: 0}, // 左移
+        {x: 1, y: 0},  // 右移
+        {x: -2, y: 0}, // 左移两格
+        {x: 2, y: 0},  // 右移两格
+        {x: 0, y: -1}, // 上移
+        {x: 0, y: 1}   // 下移
+    ];
+
+    // 尝试所有可能的位置调整
+    for (let kick of kicks) {
+        const newX = piece.x + kick.x;
+        const newY = piece.y + kick.y;
+        
+        // 创建一个临时piece对象用于检查
+        const testPiece = {
+            shape: newShape,
+            x: newX,
+            y: newY
+        };
+        
+        // 如果这个位置有效，则应用旋转
+        if (!collide(testPiece, newX, newY)) {
+            piece.shape = newShape;
+            piece.x = newX;
+            piece.y = newY;
+            return true;
+        }
+    }
+    return false;
+}
+
 function move(dx, dy) {
     if (!collide(current, current.x + dx, current.y + dy)) {
         current.x += dx;
@@ -259,11 +324,8 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'ArrowRight') move(1, 0);
     else if (e.key === 'ArrowDown') move(0, 1);
     else if (e.key === 'ArrowUp') {
-        const newShape = rotate(current.shape);
-        if (!collide(current, current.x, current.y, newShape)) {
-            current.shape = newShape;
-            draw();
-        }
+        tryRotate(current);
+        draw();
     }
 });
 
@@ -288,23 +350,29 @@ function tick() {
         draw();
     } else {
         // 如果方块已经接触到其他方块或底部
-        if (current.y >= 0) {
-            merge(current);
-            if (clearLines()) {
-                document.getElementById('lines').textContent = linesCleared;
-            }
-            current = nextPieceBlock;
-            current.y = -4;
-            current.hasGeneratedNext = false; // 重置标记
-            
-            if (collide(current, current.x, current.y)) {
+        merge(current);
+        if (clearLines()) {
+            document.getElementById('lines').textContent = linesCleared;
+        }
+        
+        // 检查游戏是否结束 - 检查顶部几行是否有方块
+        for (let j = 0; j < COLS; j++) {
+            if (board[0][j] || board[1][j]) {
                 endGame();
                 return;
             }
-        } else {
-            // 如果方块还没完全进入游戏区域，继续下落
-            current.y++;
         }
+        
+        current = nextPieceBlock;
+        current.y = -2; // 调整初始位置更靠近顶部
+        current.hasGeneratedNext = false;
+        
+        // 如果新方块一出现就发生碰撞，游戏结束
+        if (collide(current, current.x, current.y)) {
+            endGame();
+            return;
+        }
+        
         draw();
     }
 }
