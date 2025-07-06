@@ -101,27 +101,45 @@ body {
     position: absolute;
     left: 32px;
     top: 32px;
-    z-index: 2;
-    padding: 6px 18px;
-    font-size: 1em;
+    padding: 8px 20px;
+    font-size: 16px;
+    background-color: #ff9f1a;
+    color: white;
     border: none;
-    border-radius: 6px;
-    background: #ff9800;
-    color: #fff;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background-color 0.3s;
+    z-index: 10;
+}
+
+#pause-btn span {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 18px;
+    line-height: 1;
 }
 
 #pause-btn.paused {
-    background: #757575;
+    background-color: #4CAF50;
 }
 
 #pause-btn:hover {
-    background: #e65100;
+    background-color: #ff8c00;
+}
+
+#pause-btn.paused:hover {
+    background-color: #45a049;
 }
 
 #main-container {
     position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .tetris-title {
@@ -155,4 +173,63 @@ body {
     margin-bottom: 16px;
     color: #fff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.game-stats {
+    width: 300px;
+    margin-bottom: 10px;
+    text-align: left;
+    font-size: 18px;
+    color: #333;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.game-stats > div {
+    margin: 5px 0;
+}
+
+.game-area {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    margin-top: 10px;
+}
+
+#tetris {
+    display: block;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    background: white;
+}
+
+.side-panel {
+    position: absolute;
+    right: -140px;
+    top: 0;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.next-piece {
+    width: 100px;
+}
+
+.panel-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+#next-piece {
+    display: block;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
 }
