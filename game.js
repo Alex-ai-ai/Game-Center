@@ -346,7 +346,7 @@ function hardDrop() {
 
 function tick() {
     if (paused) return;
-
+    
     if (move(0, 1)) {
         draw();
     } else {
@@ -639,9 +639,7 @@ document.addEventListener('keydown', e => {
     
     if (e.key === 'ArrowLeft') move(-1, 0);
     else if (e.key === 'ArrowRight') move(1, 0);
-    else if (e.key === 'ArrowDown') {
-        move(0, 1);
-    }
+    else if (e.key === 'ArrowDown') move(0, 1);
     else if (e.key === 'Tab') {
         hardDrop();  // 按Tab键直接下落到底部
     }
