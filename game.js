@@ -99,8 +99,37 @@ const DIFFICULTY_SETTINGS = {
 };
 
 // 设置画布大小
-canvas.width = COLS * BLOCK_SIZE;
-canvas.height = ROWS * BLOCK_SIZE;
+function setCanvasSize() {
+    if (isMobile) {
+        // 移动端设置
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        // 计算合适的方块大小
+        const blockSize = Math.min(Math.floor(screenWidth / 12), Math.floor((screenHeight - 200) / 20));
+        
+        // 更新全局方块大小
+        BLOCK_SIZE = blockSize;
+        
+        // 更新画布大小
+        canvas.width = COLS * BLOCK_SIZE;
+        canvas.height = ROWS * BLOCK_SIZE;
+        
+        // 更新预览区域大小
+        nextCanvas.width = 4 * BLOCK_SIZE;
+        nextCanvas.height = 4 * BLOCK_SIZE;
+    } else {
+        // PC端保持原始大小
+        canvas.width = COLS * BLOCK_SIZE;
+        canvas.height = ROWS * BLOCK_SIZE;
+    }
+}
+
+// 在页面加载和屏幕旋转时调整画布大小
+window.addEventListener('load', setCanvasSize);
+window.addEventListener('orientationchange', () => {
+    setTimeout(setCanvasSize, 100);
+});
 
 function getDropInterval(level) {
     const settings = DIFFICULTY_SETTINGS[currentDifficulty];
@@ -109,11 +138,12 @@ function getDropInterval(level) {
 }
 
 function resetGame(difficulty = 'easy') {
+    setCanvasSize();
     currentDifficulty = difficulty;
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     score = 0;
     gameOver = false;
-    nextPieceBlock = randomPiece();  // 游戏开始时生成第一个预览方块
+    nextPieceBlock = randomPiece();
     current = randomPiece();
     current.y = -2;
     updateScore();
@@ -126,7 +156,7 @@ function resetGame(difficulty = 'easy') {
     dropTimer = setInterval(tick, dropInterval);
     draw();
     setPause(false);
-    drawNextPiece();  // 游戏开始时显示预览
+    drawNextPiece();
     document.getElementById('lines').textContent = '0';
     document.getElementById('difficulty').textContent = DIFFICULTY_SETTINGS[currentDifficulty].name;
 }
