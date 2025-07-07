@@ -113,10 +113,9 @@ function resetGame(difficulty = 'easy') {
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     score = 0;
     gameOver = false;
-    nextPieceBlock = randomPiece();
+    nextPieceBlock = randomPiece();  // 游戏开始时生成第一个预览方块
     current = randomPiece();
     current.y = -2;
-    current.hasGeneratedNext = false;
     updateScore();
     endScreen.style.display = 'none';
     document.getElementById('main-container').style.display = '';
@@ -127,7 +126,7 @@ function resetGame(difficulty = 'easy') {
     dropTimer = setInterval(tick, dropInterval);
     draw();
     setPause(false);
-    drawNextPiece();
+    drawNextPiece();  // 游戏开始时显示预览
     document.getElementById('lines').textContent = '0';
     document.getElementById('difficulty').textContent = DIFFICULTY_SETTINGS[currentDifficulty].name;
 }
@@ -161,19 +160,16 @@ function randomPiece() {
 
 function collide(piece, x, y) {
     const shape = piece.shape;
-    for (let i = 0; i < shape.length; i++) {
-        for (let j = 0; j < shape[i].length; j++) {
-            if (shape[i][j]) {
-                const newX = x + j;
-                const newY = y + i;
+    for (let row = 0; row < shape.length; row++) {
+        for (let col = 0; col < shape[row].length; col++) {
+            if (shape[row][col]) {
+                const newX = x + col;
+                const newY = y + row;
                 
-                // 检查是否超出边界
                 if (newX < 0 || newX >= COLS || newY >= ROWS) {
                     return true;
                 }
                 
-                // 检查是否与其他方块碰撞
-                // 只在方块完全进入游戏区域后才检查碰撞
                 if (newY >= 0 && board[newY] && board[newY][newX]) {
                     return true;
                 }
@@ -199,60 +195,21 @@ function merge(piece) {
     }
 }
 
-function drawCell(x, y, color) {
-    const size = BLOCK_SIZE;
-    
-    // 填充方块背景
+function drawBlock(x, y, color) {
     ctx.fillStyle = color;
-    ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, size, size);
-    
-    // 绘制边框 - 使用更细的线条
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, size, size);
-    
-    // 添加更淡的内部阴影效果
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.moveTo(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + size - 2);
-    ctx.lineTo(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + 2);
-    ctx.lineTo(x * BLOCK_SIZE + size - 2, y * BLOCK_SIZE + 2);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-    ctx.moveTo(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + size - 2);
-    ctx.lineTo(x * BLOCK_SIZE + size - 2, y * BLOCK_SIZE + size - 2);
-    ctx.lineTo(x * BLOCK_SIZE + size - 2, y * BLOCK_SIZE + 2);
-    ctx.stroke();
+    ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 function draw() {
-    // 清除画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 绘制背景网格
-    ctx.strokeStyle = '#e0e0e0';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= ROWS; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, i * BLOCK_SIZE);
-        ctx.lineTo(canvas.width, i * BLOCK_SIZE);
-        ctx.stroke();
-    }
-    for (let j = 0; j <= COLS; j++) {
-        ctx.beginPath();
-        ctx.moveTo(j * BLOCK_SIZE, 0);
-        ctx.lineTo(j * BLOCK_SIZE, canvas.height);
-        ctx.stroke();
-    }
-    
-    // 绘制已经固定的方块
-    for (let i = 0; i < ROWS; i++) {
-        for (let j = 0; j < COLS; j++) {
-            if (board[i][j]) {
-                drawCell(j, i, board[i][j]);
+    // 绘制已固定的方块
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            if (board[y][x]) {
+                drawBlock(x, y, board[y][x]);
             }
         }
     }
@@ -260,10 +217,14 @@ function draw() {
     // 绘制当前方块
     if (current) {
         const shape = current.shape;
-        for (let i = 0; i < shape.length; i++) {
-            for (let j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] && (current.y + i >= 0)) {
-                    drawCell(current.x + j, current.y + i, current.color);
+        for (let row = 0; row < shape.length; row++) {
+            for (let col = 0; col < shape[row].length; col++) {
+                if (shape[row][col]) {
+                    const x = current.x + col;
+                    const y = current.y + row;
+                    if (y >= 0) {  // 只绘制可见部分
+                        drawBlock(x, y, current.color);
+                    }
                 }
             }
         }
@@ -355,90 +316,69 @@ function tryRotate(piece) {
 }
 
 function move(dx, dy) {
-    if (!collide(current, current.x + dx, current.y + dy)) {
-        current.x += dx;
-        current.y += dy;
-        draw(); // 确保移动后立即重绘
+    const newX = current.x + dx;
+    const newY = current.y + dy;
+    
+    if (!collide(current, newX, newY)) {
+        current.x = newX;
+        current.y = newY;
+        draw();  // 立即重绘，提高响应速度
+        
+        // 只在下落时检查是否需要更新预览
+        if (dy > 0 && current.y >= 0) {
+            drawNextPiece();
+        }
         return true;
     }
     return false;
 }
 
 function hardDrop() {
-    while (move(0, 1));
+    let dropDistance = 0;
+    while (move(0, 1)) {
+        dropDistance++;
+    }
+    score += dropDistance;
+    updateScore();
     tick();
+    return dropDistance;
 }
 
-document.addEventListener('keydown', e => {
-    if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "Tab"].includes(e.key)) {
-        e.preventDefault(); // 阻止页面滚动和Tab默认行为
-    }
-    if (e.key === ' ' && !gameOver) {
-        setPause(!paused);
-        return;
-    }
-    if (paused || gameOver) return;
-    
-    if (e.key === 'ArrowLeft') move(-1, 0);
-    else if (e.key === 'ArrowRight') move(1, 0);
-    else if (e.key === 'ArrowDown') {
-        move(0, 1);
-    }
-    else if (e.key === 'Tab') {
-        hardDrop();  // 按Tab键直接下落到底部
-    }
-    else if (e.key === 'ArrowUp') {
-        tryRotate(current);
-        draw();
-    }
-});
-
 function tick() {
-    if (gameOver || paused) return;
-    
-    // 检查当前方块是否完全进入屏幕
-    const isFullyVisible = current.shape.every((row, i) => 
-        !row.some(cell => cell === 1) || (current.y + i >= 0)
-    );
-    
-    // 如果方块完全进入屏幕且还没有生成下一个方块，则生成下一个方块
-    if (isFullyVisible && !current.hasGeneratedNext) {
-        nextPieceBlock = randomPiece();
-        drawNextPiece();
-        current.hasGeneratedNext = true;
-    }
-    
-    // 检查是否可以移动
-    if (!collide(current, current.x, current.y + 1)) {
-        current.y++;
+    if (paused) return;
+
+    if (move(0, 1)) {
         draw();
     } else {
-        // 如果方块已经接触到其他方块或底部
-        merge(current);
-        if (clearLines()) {
-            document.getElementById('lines').textContent = linesCleared;
-        }
-        
-        // 检查游戏是否结束 - 检查顶部几行是否有方块
-        for (let j = 0; j < COLS; j++) {
-            if (board[0][j] || board[1][j]) {
-                endGame();
-                return;
-            }
-        }
-        
-        current = nextPieceBlock;
-        current.y = -2; // 调整初始位置更靠近顶部
-        current.hasGeneratedNext = false;
-        
-        // 如果新方块一出现就发生碰撞，游戏结束
-        if (collide(current, current.x, current.y)) {
+        // 方块已经无法继续下落
+        if (current.y < 0) {
+            // 游戏结束
             endGame();
             return;
         }
-        
-        draw();
+        merge(current);
+        const clearedLines = clearLines();
+        if (clearedLines > 0) {
+            score += clearedLines * SCORE_PER_LINE * level;
+            linesCleared += clearedLines;
+            updateScore();
+            updateLines(linesCleared);
+            updateGameLevel();
+        }
+
+        // 使用预览的方块作为当前方块
+        current = nextPieceBlock;
+        current.y = -2;  // 从顶部开始
+
+        // 生成新的预览方块，但暂不显示
+        nextPieceBlock = randomPiece();
+
+        // 更新下落速度
+        clearInterval(dropTimer);
+        dropInterval = getDropInterval(level);
+        dropTimer = setInterval(tick, dropInterval);
     }
+    draw();
 }
 
 // 恢复暂停按钮点击事件
@@ -474,57 +414,41 @@ function setPause(state) {
     }
 }
 
-function getStarCount(score) {
-    // 修改星星评级机制
-    // 根据消除的行数来评定星级
-    if (linesCleared < 10) return 0;      // 0星：消除不到10行
-    else if (linesCleared < 20) return 1;  // 1星：消除10-19行
-    else if (linesCleared < 30) return 2;  // 2星：消除20-29行
-    else if (linesCleared < 40) return 3;  // 3星：消除30-39行
-    else if (linesCleared < 50) return 4;  // 4星：消除40-49行
-    else return 5;                         // 5星：消除50行以上
+function getStarCount(linesCleared) {
+    // 满足分数或消除行数任一条件即可
+    if (score >= 2000 || linesCleared >= 50) return 5;
+    if (score >= 1500 || linesCleared >= 40) return 4;
+    if (score >= 1000 || linesCleared >= 30) return 3;
+    if (score >= 500 || linesCleared >= 20) return 2;
+    if (score >= 200 || linesCleared >= 10) return 1;
+    return 0;
 }
 
 function endGame() {
     gameOver = true;
     clearInterval(dropTimer);
-    document.getElementById('main-container').style.display = 'none';
     endScreen.style.display = 'flex';
-    let stars = getStarCount(score);
+    endTitle.textContent = '游戏结束';
+    endScore.textContent = `最终得分：${score}`;
     
-    // 更新结束界面的标题和星星显示
-    if (linesCleared < 10) {
-        endTitle.textContent = '继续加油';
-    } else if (linesCleared < 20) {
-        endTitle.textContent = '有待提高';
-    } else if (linesCleared < 30) {
-        endTitle.textContent = '表现不错';
-    } else if (linesCleared < 40) {
-        endTitle.textContent = '很棒';
-    } else if (linesCleared < 50) {
-        endTitle.textContent = '太厉害了';
-    } else {
-        endTitle.textContent = '完美游戏';
+    // 更新当前难度的最高分
+    const bestScoreKey = `tetris_${currentDifficulty}`;
+    const currentBest = localStorage.getItem(bestScoreKey) || 0;
+    if (score > currentBest) {
+        localStorage.setItem(bestScoreKey, score);
+        document.getElementById(`${currentDifficulty}-best-score`).textContent = score;
     }
-
-    // 清空并重新生成星星
+    
+    // 显示星级
+    const stars = getStarCount(linesCleared);
     starContainer.innerHTML = '';
     for (let i = 0; i < 5; i++) {
-        const star = document.createElement('span');
+        const star = document.createElement('div');
         star.className = 'star';
         if (i >= stars) {
-            star.style.filter = 'grayscale(1) opacity(0.4)';
+            star.style.opacity = '0.3';
         }
         starContainer.appendChild(star);
-    }
-    
-    endScore.textContent = `消除行数：${linesCleared}`;
-    setPause(false);
-    
-    // 保存最高纪录
-    let best = localStorage.getItem('tetris_best') || 0;
-    if (linesCleared > best) {
-        localStorage.setItem('tetris_best', linesCleared);
     }
 }
 
@@ -537,12 +461,15 @@ menuBtn.onclick = function() {
 };
 
 function updateGameLevel() {
-    const newLevel = Math.floor(linesCleared / 10) + 1;
-    if(newLevel !== level) {
+    const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+    const newLevel = Math.floor(linesCleared / settings.linesPerLevel) + 1;
+    if (newLevel !== level) {
         level = newLevel;
-        dropInterval = Math.max(1000 - (level - 1) * 100, 100);
-        if (dropTimer) clearInterval(dropTimer);
-        dropTimer = setInterval(update, dropInterval);
+        document.getElementById('level').textContent = level;
+        // 更新下落速度
+        clearInterval(dropTimer);
+        dropInterval = getDropInterval(level);
+        dropTimer = setInterval(tick, dropInterval);
     }
 }
 
@@ -563,41 +490,22 @@ function updateLines(newLines) {
 }
 
 function drawNextPiece() {
-    if (!nextPieceBlock) {
-        nextPieceBlock = randomPiece();
-    }
-    
     nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
     
-    // 调整方块大小
-    const blockSize = 25; // 减小方块大小
-    const size = blockSize - 1;
+    if (!nextPieceBlock) return;
     
-    // 计算预览区域中心位置
-    const pieceWidth = nextPieceBlock.shape[0].length * blockSize;
-    const pieceHeight = nextPieceBlock.shape.length * blockSize;
-    const offsetX = (nextCanvas.width - pieceWidth) / 2;
-    const offsetY = (nextCanvas.height - pieceHeight) / 2;
-    
-    // 绘制方块
-    for (let i = 0; i < nextPieceBlock.shape.length; i++) {
-        for (let j = 0; j < nextPieceBlock.shape[i].length; j++) {
-            if (nextPieceBlock.shape[i][j]) {
-                const x = offsetX + j * blockSize;
-                const y = offsetY + i * blockSize;
-                
-                // 填充方块
+    const blockSize = 20;
+    const offsetX = (nextCanvas.width - nextPieceBlock.shape[0].length * blockSize) / 2;
+    const offsetY = (nextCanvas.height - nextPieceBlock.shape.length * blockSize) / 2;
+
+    nextPieceBlock.shape.forEach((row, i) => {
+        row.forEach((value, j) => {
+            if (value) {
                 nextCtx.fillStyle = nextPieceBlock.color;
-                nextCtx.fillRect(x, y, size, size);
-                
-                // 绘制边框
-                nextCtx.beginPath();
-                nextCtx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-                nextCtx.lineWidth = 0.5;
-                nextCtx.strokeRect(x, y, size, size);
+                nextCtx.fillRect(offsetX + j * blockSize, offsetY + i * blockSize, blockSize - 1, blockSize - 1);
             }
-        }
-    }
+        });
+    });
 }
 
 // 添加CSS动画
@@ -716,4 +624,29 @@ document.getElementById('rules-btn')?.addEventListener('click', () => {
 
 document.getElementById('close-rules-btn')?.addEventListener('click', () => {
     document.getElementById('rules-menu').style.display = 'none';
+});
+
+// 键盘控制
+document.addEventListener('keydown', e => {
+    if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "Tab"].includes(e.key)) {
+        e.preventDefault(); // 阻止页面滚动和Tab默认行为
+    }
+    if (e.key === ' ' && !gameOver) {
+        setPause(!paused);
+        return;
+    }
+    if (paused || gameOver) return;
+    
+    if (e.key === 'ArrowLeft') move(-1, 0);
+    else if (e.key === 'ArrowRight') move(1, 0);
+    else if (e.key === 'ArrowDown') {
+        move(0, 1);
+    }
+    else if (e.key === 'Tab') {
+        hardDrop();  // 按Tab键直接下落到底部
+    }
+    else if (e.key === 'ArrowUp') {
+        tryRotate(current);
+        draw();
+    }
 });

@@ -15,17 +15,34 @@
 <body>
     <!-- 主菜单 -->
     <div id="menu-container">
-        <div id="best-score-panel">最高纪录：<span id="best-score">0</span></div>
+        <button id="rules-btn" class="rules-btn">规则</button>
         <div class="tetris-title">
             <span>T</span><span>E</span><span>T</span><span>R</span><span>I</span><span>S</span>
         </div>
         <div class="difficulty-options">
-            <div class="difficulty-option easy selected" data-difficulty="easy">简单</div>
-            <div class="difficulty-option normal" data-difficulty="normal">普通</div>
-            <div class="difficulty-option hard" data-difficulty="hard">困难</div>
+            <div class="difficulty-group">
+                <div class="difficulty-option easy selected" data-difficulty="easy">简单</div>
+                <div class="mode-high-score easy">
+                    <span>最高分</span>
+                    <span id="easy-best-score">0</span>
+                </div>
+            </div>
+            <div class="difficulty-group">
+                <div class="difficulty-option normal" data-difficulty="normal">普通</div>
+                <div class="mode-high-score normal">
+                    <span>最高分</span>
+                    <span id="normal-best-score">0</span>
+                </div>
+            </div>
+            <div class="difficulty-group">
+                <div class="difficulty-option hard" data-difficulty="hard">困难</div>
+                <div class="mode-high-score hard">
+                    <span>最高分</span>
+                    <span id="hard-best-score">0</span>
+                </div>
+            </div>
         </div>
         <button id="start-btn">开始游戏</button>
-        <button id="rules-btn" class="rules-btn">规则</button>
     </div>
     <!-- 游戏主界面 -->
     <div id="main-container" style="display:none;">
@@ -100,11 +117,19 @@
 
                 <h3>星级评定：</h3>
                 <ul>
-                    <li>★☆☆☆☆ - 消除10-19行</li>
-                    <li>★★☆☆☆ - 消除20-29行</li>
-                    <li>★★★☆☆ - 消除30-39行</li>
-                    <li>★★★★☆ - 消除40-49行</li>
-                    <li>★★★★★ - 消除50行以上</li>
+                    <li>★☆☆☆☆ - 需同时满足：200-499分 且 消除10-19行</li>
+                    <li>★★☆☆☆ - 需同时满足：500-999分 且 消除20-29行</li>
+                    <li>★★★☆☆ - 需同时满足：1000-1499分 且 消除30-39行</li>
+                    <li>★★★★☆ - 需同时满足：1500-1999分 且 消除40-49行</li>
+                    <li>★★★★★ - 需同时满足：2000分以上 且 消除50行以上</li>
+                </ul>
+
+                <h3>分数说明：</h3>
+                <ul>
+                    <li>每消除一行：10分 × 当前等级</li>
+                    <li>快速下落：每格1分</li>
+                    <li>等级越高，下落速度越快，得分越多</li>
+                    <li>必须同时达到分数和消除行数要求才能获得对应星级</li>
                 </ul>
             </div>
             <button id="close-rules-btn" class="menu-btn">返回</button>
@@ -164,7 +189,9 @@
             document.getElementById('menu-container').style.display = '';
             document.getElementById('main-container').style.display = 'none';
             document.getElementById('end-screen').style.display = 'none';
-            document.getElementById('best-score').textContent = localStorage.getItem('tetris_best') || 0;
+            document.getElementById('easy-best-score').textContent = localStorage.getItem('tetris_easy') || 0;
+            document.getElementById('normal-best-score').textContent = localStorage.getItem('tetris_normal') || 0;
+            document.getElementById('hard-best-score').textContent = localStorage.getItem('tetris_hard') || 0;
             
             // 恢复画布原始大小
             const canvas = document.getElementById('tetris');

@@ -40,7 +40,7 @@ body {
     100% { background-position: 0% 50%; }
 }
 
-#score-panel, #best-score-panel {
+#score-panel {
     font-size: 1.3em;
     margin-bottom: 16px;
 }
@@ -48,7 +48,7 @@ body {
 #tetris {
     width: 300px;
     height: 600px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.7);  /* 降低背景透明度 */
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     display: block;
@@ -183,11 +183,31 @@ body {
 .tetris-title span:nth-child(5) { color: #4CAF50; } /* I - 绿色 */
 .tetris-title span:nth-child(6) { color: #2196F3; } /* S - 蓝色 */
 
-#best-score-panel {
-    font-size: 1.3em;
-    margin-bottom: 16px;
+.mode-scores {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.mode-high-score {
+    font-size: 1.2em;
+    margin: 10px 0;
     color: #fff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mode-high-score.easy {
+    color: #ff6b6b;
+}
+
+.mode-high-score.normal {
+    color: #4facfe;
+}
+
+.mode-high-score.hard {
+    color: #a166ab;
 }
 
 .game-stats {
@@ -207,6 +227,53 @@ body {
 
 .game-stats > div {
     margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-stats .score-label {
+    font-weight: bold;
+}
+
+.game-stats .high-scores {
+    margin-top: 10px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.game-stats .high-scores-title {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.game-stats .high-score-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    padding: 2px 0;
+}
+
+.game-stats .high-score-item .mode {
+    color: #333;
+    font-weight: 500;
+}
+
+.game-stats .high-score-item .score {
+    font-weight: bold;
+}
+
+.game-stats .high-score-item.easy .mode {
+    color: #ff6b6b;
+}
+
+.game-stats .high-score-item.normal .mode {
+    color: #4facfe;
+}
+
+.game-stats .high-score-item.hard .mode {
+    color: #a166ab;
 }
 
 .game-area {
@@ -252,7 +319,7 @@ body {
 #next-piece {
     width: 110px;
     height: 110px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.7);  /* 预览区域也使用相同的透明度 */
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
 }
@@ -349,11 +416,15 @@ body.mobile .mobile-only {
         width: 100%;
         max-width: 350px;
         margin: 0 auto 10px auto;
-        font-size: 16px;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+    }
+
+    .game-stats .high-score-item {
+        font-size: 14px;
+    }
+
+    .game-stats .high-scores-title {
+        font-size: 14px;
     }
 
     #tetris {
@@ -623,22 +694,20 @@ html {
 
 .rules-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    background: linear-gradient(145deg, #4CAF50, #45a049);
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    background: rgba(76, 175, 80, 0.3);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .rules-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: rgba(76, 175, 80, 0.5);
 }
 
 .rules-container {
@@ -722,17 +791,26 @@ html {
     justify-content: center;
 }
 
+.difficulty-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
 .difficulty-option {
-    padding: 15px 30px;
-    border-radius: 12px;
+    padding: 10px 20px;  /* 减小内边距 */
+    border-radius: 8px;  /* 减小圆角 */
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;    /* 减小字体 */
     font-weight: bold;
     transition: all 0.3s ease;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     border: 2px solid transparent;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
+    min-width: 80px;    /* 减小最小宽度 */
+    text-align: center;
 }
 
 .difficulty-option.easy {
@@ -772,6 +850,29 @@ html {
     }
     100% {
         box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+@media (max-width: 768px) {
+    .difficulty-options {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .difficulty-group {
+        gap: 8px;
+    }
+
+    .difficulty-option {
+        padding: 8px 16px;  /* 移动端更小的内边距 */
+        font-size: 14px;    /* 移动端更小的字体 */
+        min-width: 70px;    /* 移动端更小的最小宽度 */
+    }
+
+    .mode-high-score {
+        font-size: 0.85em;
+        padding: 6px 12px;
+        min-width: 100px;
     }
 }
 
