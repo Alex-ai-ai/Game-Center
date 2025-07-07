@@ -650,3 +650,83 @@ document.addEventListener('keydown', e => {
         draw();
     }
 });
+
+// 移动端控制按钮事件处理
+if (isMobile) {
+    document.getElementById('left-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(-1, 0);
+    });
+
+    document.getElementById('right-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(1, 0);
+    });
+
+    document.getElementById('down-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(0, 1);
+        // 记录按下时间和次数，用于判断快速下落
+        const now = Date.now();
+        if (now - lastDownPress < 600) {
+            downPressCount++;
+            if (downPressCount >= 3) {
+                hardDrop();
+                downPressCount = 0;
+            }
+        } else {
+            downPressCount = 1;
+        }
+        lastDownPress = now;
+    });
+
+    document.getElementById('rotate-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        tryRotate(current);
+    });
+
+    document.getElementById('drop-btn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        hardDrop();
+    });
+
+    // 防止移动端滚动和缩放
+    document.addEventListener('touchmove', (e) => {
+        if (e.target.closest('#mobile-controls')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // 调整画布大小
+    function resizeCanvas() {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const gameArea = document.querySelector('.game-area');
+        
+        // 计算合适的方块大小
+        const blockSize = Math.min(Math.floor(screenWidth / 12), Math.floor(screenHeight / 24));
+        
+        // 更新画布大小
+        canvas.width = COLS * blockSize;
+        canvas.height = ROWS * blockSize;
+        
+        // 更新预览区域大小
+        nextCanvas.width = 4 * blockSize;
+        nextCanvas.height = 4 * blockSize;
+        
+        // 更新全局方块大小
+        BLOCK_SIZE = blockSize;
+        
+        // 重新绘制
+        draw();
+        drawNextPiece();
+    }
+
+    // 监听屏幕旋转
+    window.addEventListener('orientationchange', () => {
+        setTimeout(resizeCanvas, 100);
+    });
+
+    // 初始调整大小
+    resizeCanvas();
+}

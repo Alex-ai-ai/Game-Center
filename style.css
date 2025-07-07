@@ -453,12 +453,126 @@ body.mobile .mobile-only {
     }
 
     #mobile-controls {
-        position: fixed;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(255, 255, 255, 0.9);
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        width: 100%;
+        max-width: 300px;
+        padding: 20px 10px;
+        margin: 0 auto;
+        margin-left: 130px;  /* 继续增加右移距离 */
         z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;  /* 稍微减小按钮之间的间距 */
+    }
+
+    .control-row {
+        display: flex;
+        justify-content: flex-start;
+        gap: 12px;  /* 减小间距 */
+    }
+
+    .arrow-controls {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;  /* 减小间距 */
+    }
+
+    /* 箭头按钮行 */
+    .arrow-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    #mobile-controls button {
+        width: 45px;   /* 减小按钮尺寸 */
+        height: 45px;  /* 减小按钮尺寸 */
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-size: 18px;  /* 减小图标大小 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        transition: all 0.2s;
+    }
+
+    /* 暂停按钮样式 */
+    #pause-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50%;
+        padding: 0 !important;
+        font-size: 16px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #pause-btn #pause-icon {
+        font-size: 16px;
+    }
+
+    /* 功能按钮（旋转和直接下落）样式 */
+    #rotate-btn, #drop-btn {
+        background: rgba(76, 175, 80, 0.8) !important;
+        color: white !important;
+    }
+
+    /* 移动端游戏区域适配 */
+    .game-area {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 0;
+    }
+
+    #tetris {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    .side-panel {
+        margin: 10px 0;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    /* 移动端菜单适配 */
+    .tetris-title {
+        font-size: 2.5em;
+    }
+
+    .difficulty-options {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .difficulty-group {
+        width: 100%;
+    }
+
+    /* 移动端暂停按钮位置调整 */
+    #pause-btn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        padding: 8px 15px;
+        font-size: 14px;
     }
 }
 
