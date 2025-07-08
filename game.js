@@ -115,10 +115,26 @@ let currentDifficulty = 'normal'; // 默认普通难度
 let lastDownPress = 0;  // 记录上次按下向下键的时间
 let downPressCount = 0;  // 记录连续按下次数
 
+// Difficulty settings with customizable speeds
 const DIFFICULTY_SETTINGS = {
-    'easy': { initialSpeed: 1000, speedIncrease: 50 },
-    'normal': { initialSpeed: 800, speedIncrease: 75 },
-    'hard': { initialSpeed: 500, speedIncrease: 100 }
+    'easy': { 
+        initialSpeed: 667, 
+        speedIncrease: 33,
+        linesPerLevel: 10,  // 每消除10行升一级
+        maxSpeedIncrease: 200  // 最多加快200ms
+    },
+    'normal': { 
+        initialSpeed: 533, 
+        speedIncrease: 50,
+        linesPerLevel: 8,   // 每消除8行升一级
+        maxSpeedIncrease: 300  // 最多加快300ms
+    },
+    'hard': { 
+        initialSpeed: 250, 
+        speedIncrease: 80,
+        linesPerLevel: 5,   // 每消除5行升一级
+        maxSpeedIncrease: 400  // 最多加快400ms
+    }
 };
 
 // 设置画布大小
@@ -156,32 +172,71 @@ window.addEventListener('orientationchange', () => {
 
 function getDropInterval(level) {
     const settings = DIFFICULTY_SETTINGS[currentDifficulty];
-    const speed = settings.initialSpeed - (level - 1) * settings.speedIncrease;
-    return Math.max(speed, 100);
+    const speedIncrease = Math.min((level - 1) * settings.speedIncrease, settings.maxSpeedIncrease);
+    const speed = settings.initialSpeed - speedIncrease;
+    return Math.max(speed, 100);  // 保持最小间隔100ms以确保游戏可玩性
 }
 
-function resetGame(difficulty = 'easy') {
-    setCanvasSize();
+function resetGame(difficulty = 'normal') {
+    // 在重置前检查是否创造新纪录
+    const bestScoreKey = `tetris_${currentDifficulty}_best`;
+    const currentBest = parseInt(localStorage.getItem(bestScoreKey)) || 0;
+    if (score > currentBest) {
+        // 保存新纪录
+        localStorage.setItem(bestScoreKey, score);
+        // 显示新纪录提示
+        alert(`恭喜！您创造了新的纪录：${score}分！\n难度：${
+            currentDifficulty === 'easy' ? '简单' :
+            currentDifficulty === 'normal' ? '普通' :
+            '困难'
+        }`);
+    }
+
+    // 清除所有定时器
+    if (dropTimer) clearInterval(dropTimer);
+    if (gameLoop) {
+        clearInterval(gameLoop);
+        gameLoop = null;
+    }
+
+    // 重置游戏状态
     currentDifficulty = difficulty;
     board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
     score = 0;
     gameOver = false;
-    nextPieceBlock = randomPiece();
-    current = randomPiece();
-    current.y = -2;
-    updateScore();
-    endScreen.style.display = 'none';
-    document.getElementById('main-container').style.display = '';
     linesCleared = 0;
     level = 1;
-    dropInterval = getDropInterval(level);
-    if (dropTimer) clearInterval(dropTimer);
-    dropTimer = setInterval(tick, dropInterval);
-    draw();
-    setPause(false);
-    drawNextPiece();
+    
+    // 生成新方块
+    nextPieceBlock = randomPiece();
+    current = randomPiece();
+    current.y = -1;
+    
+    // 更新显示
+    updateScore();
+    document.getElementById('score').textContent = '0';
+    document.getElementById('level').textContent = '1';
     document.getElementById('lines').textContent = '0';
-    document.getElementById('difficulty').textContent = DIFFICULTY_SETTINGS[currentDifficulty].name;
+    
+    // 隐藏结束和暂停界面
+    document.getElementById('end-screen').style.display = 'none';
+    document.getElementById('pause-menu').style.display = 'none';
+    document.getElementById('main-container').style.display = '';
+    
+    // 重置游戏速度
+    dropInterval = getDropInterval(level);
+    dropTimer = setInterval(() => {
+        if (!gameOver && !paused) {
+            tick();
+        }
+    }, dropInterval);
+    
+    // 重绘游戏画面
+    draw();
+    drawNextPiece();
+    
+    // 取消暂停状态
+    setPause(false);
 }
 
 // 初始化游戏
@@ -201,7 +256,7 @@ function initGame(difficulty = 'normal') {
     // 生成初始方块
     nextPieceBlock = randomPiece();
     current = randomPiece();
-    current.y = -2;
+    current.y = -1;  // 从更高的位置开始
     
     // 更新显示
     updateScore();
@@ -343,6 +398,7 @@ function draw() {
     }
 }
 
+// Line clearing logic
 function clearLines() {
     let lines = 0;
     
@@ -475,6 +531,7 @@ function move(dx, dy) {
     return false;
 }
 
+// Hard drop implementation
 function hardDrop() {
     let dropDistance = 0;
     while (move(0, 1)) {
@@ -536,14 +593,17 @@ function endGame() {
     clearInterval(dropTimer);
     endScreen.style.display = 'flex';
     endTitle.textContent = '游戏结束';
-    endScore.textContent = `最终得分：${score}`;
     
     // 更新当前难度的最高分
-    const bestScoreKey = `tetris_${currentDifficulty}`;
-    const currentBest = localStorage.getItem(bestScoreKey) || 0;
+    const bestScoreKey = `tetris_${currentDifficulty}_best`;
+    const currentBest = parseInt(localStorage.getItem(bestScoreKey)) || 0;
+    
+    // 显示最终得分和最高分
     if (score > currentBest) {
+        endScore.textContent = `${score} (新纪录！)`;
         localStorage.setItem(bestScoreKey, score);
-        document.getElementById(`${currentDifficulty}-best-score`).textContent = score;
+    } else {
+        endScore.textContent = `${score} (最高分：${currentBest})`;
     }
     
     // 显示星级
@@ -559,10 +619,28 @@ function endGame() {
     }
 }
 
-restartBtn.onclick = function() {
-    setMainBorderRandomColor(); // 每次再来一局时随机主界面边框色
-    resetGame();
-};
+// 移除重复的事件绑定
+restartBtn.onclick = null;
+
+// 重新开始按钮事件监听
+document.addEventListener('DOMContentLoaded', () => {
+    // 游戏结束界面的重新开始按钮
+    const restartBtn = document.getElementById('restart-btn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            resetGame(currentDifficulty);
+        });
+    }
+    
+    // 暂停菜单中的重新开始按钮
+    const pauseRestartBtn = document.getElementById('restart-btn-pause');
+    if (pauseRestartBtn) {
+        pauseRestartBtn.addEventListener('click', () => {
+            resetGame(currentDifficulty);
+        });
+    }
+});
+
 menuBtn.onclick = function() {
     window.location.href = 'menu.html';
 };

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五子棋 - 大网游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1F1F3A, #1A1A2E);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-button.undo {
+            background: linear-gradient(45deg, #4ECDC4, #556270);
+        }
+
+        .board-container {
+            position: relative;
+            margin: 0 auto;
+            width: 600px;
+            height: 600px;
+        }
+
+        #gameBoard {
+            background: #DEB887;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .player-turn {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+        }
+
+        .winner-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: #333;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .winner-modal h2 {
+            color: #4ECDC4;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+        }
+
+        /* 添加难度选择界面样式 */
+        .difficulty-screen {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .difficulty-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .difficulty-title {
+            text-align: center;
+            margin: 0;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+
+        /* 模式选择样式 */
+        .mode-selection {
+            margin-bottom: 30px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .mode-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        .mode-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .mode-button.selected {
+            border-color: #4ECDC4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .mode-description {
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+            margin: 10px 0;
+            min-height: 48px;
+        }
+
+        /* 难度选择样式 */
+        .difficulty-options {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-options.show {
+            display: grid;
+        }
+
+        .difficulty-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+        }
+
+        .difficulty-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .difficulty-button.selected {
+            border-color: #4ECDC4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .difficulty-button i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #4ECDC4;
+        }
+
+        .difficulty-button div:nth-child(2) {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .difficulty-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .start-game-button {
+            background: linear-gradient(135deg, #4ECDC4, #2E9B94);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            min-width: 200px;
+        }
+
+        .start-game-button:disabled {
+            background: linear-gradient(135deg, #2c7571, #1a5a56);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .start-game-button:not(:disabled):hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 游戏界面 -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="game-header">
+            <button class="back-button" id="backToModeBtn">
+                <i class="fas fa-arrow-left"></i> 返回模式选择
+            </button>
+            <h1>五子棋</h1>
+            <div style="width: 100px;"></div>
+        </div>
+        
+        <div class="game-info">
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div class="stat-label">步数</div>
+                    <div class="stat-value" id="moveCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">用时</div>
+                    <div class="stat-value" id="gameTime">00:00</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">模式</div>
+                    <div class="stat-value" id="modeDisplay">-</div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <button class="control-button undo" id="undoBtn">
+                    <i class="fas fa-undo"></i> 悔棋
+                </button>
+                <button class="control-button" id="restartBtn">
+                    <i class="fas fa-redo"></i> 重新开始
+                </button>
+            </div>
+        </div>
+
+        <div class="board-container">
+            <div class="player-turn" id="playerTurn">当前玩家: 黑子</div>
+            <canvas id="gameBoard" width="600" height="600"></canvas>
+        </div>
+    </div>
+
+    <!-- 难度选择界面 -->
+    <div class="difficulty-screen" id="difficultyScreen">
+        <div class="difficulty-container">
+            <div class="game-header">
+                <a href="index.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> 返回主页
+                </a>
+                <h1>五子棋</h1>
+                <div style="width: 100px;"></div>
+            </div>
+            
+            <!-- 添加模式选择 -->
+            <div class="mode-selection">
+                <div class="mode-buttons">
+                    <button class="mode-button" data-mode="ai">
+                        <i class="fas fa-robot"></i> AI对战
+                    </button>
+                    <button class="mode-button" data-mode="pvp">
+                        <i class="fas fa-users"></i> 双人对战
+                    </button>
+                </div>
+                <div class="mode-description" id="modeDescription">
+                    请选择游戏模式
+                </div>
+            </div>
+
+            <!-- AI难度选择 -->
+            <div class="difficulty-options" id="difficultyOptions">
+                <button class="difficulty-button" data-difficulty="easy">
+                    <i class="fas fa-child"></i>
+                    <div>简单</div>
+                    <div class="difficulty-description">适合初学者</div>
+                </button>
+                <button class="difficulty-button" data-difficulty="medium">
+                    <i class="fas fa-user"></i>
+                    <div>中等</div>
+                    <div class="difficulty-description">有一定挑战</div>
+                </button>
+                <button class="difficulty-button" data-difficulty="hard">
+                    <i class="fas fa-chess-king"></i>
+                    <div>困难</div>
+                    <div class="difficulty-description">极具挑战性</div>
+                </button>
+            </div>
+
+            <button class="start-game-button" id="startGameBtn" disabled>开始游戏</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="winner-modal" id="winnerModal">
+        <h2 id="winnerText">黑子获胜！</h2>
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-label">总步数</div>
+                <div class="stat-value" id="finalMoveCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">总用时</div>
+                <div class="stat-value" id="finalGameTime">00:00</div>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button class="control-button" id="playAgainBtn">返回模式选择</button>
+        </div>
+    </div>
+
+    <script src="gomoku.js"></script>
+</body>
+</html> 

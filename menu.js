@@ -1,8 +1,8 @@
 // 存储每个难度的最高分
 let highScores = {
-    easy: localStorage.getItem('tetris_easy') || 0,
-    normal: localStorage.getItem('tetris_normal') || 0,
-    hard: localStorage.getItem('tetris_hard') || 0
+    easy: parseInt(localStorage.getItem('tetris_easy_best')) || 0,
+    normal: parseInt(localStorage.getItem('tetris_normal_best')) || 0,
+    hard: parseInt(localStorage.getItem('tetris_hard_best')) || 0
 };
 
 // 选择的难度
@@ -10,6 +10,13 @@ let selectedDifficulty = 'normal';
 
 // 更新显示的最高分
 function updateHighScores() {
+    // 从localStorage重新读取最新的分数
+    highScores = {
+        easy: parseInt(localStorage.getItem('tetris_easy_best')) || 0,
+        normal: parseInt(localStorage.getItem('tetris_normal_best')) || 0,
+        hard: parseInt(localStorage.getItem('tetris_hard_best')) || 0
+    };
+    
     document.getElementById('easy-score').textContent = highScores.easy;
     document.getElementById('normal-score').textContent = highScores.normal;
     document.getElementById('hard-score').textContent = highScores.hard;
