@@ -1,0 +1,9 @@
+<!-- 2048 -->
+<a href="2048.html" class="game-card">
+    <div class="game-icon">
+        <i class="fas fa-dice"></i>
+    </div>
+    <h2 class="game-title">2048</h2>
+    <p class="game-description">数字益智游戏，合成更大的数字挑战极限！</p>
+    <button class="play-button">开始游戏</button>
+</a>
