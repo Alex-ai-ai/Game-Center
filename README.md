@@ -1,57 +1,84 @@
-# Tetris Upgrade
+# Game-Center（益智类游戏中心）
 
-A modern Tetris web game with star rating, high score record, pause feature, and main menu page.
+一个现代化的网页游戏集合，包含俄罗斯方块、五子棋、2048 三款经典游戏，界面美观、交互统一，支持多分支独立开发与维护。
 
-## Features
-- Classic Tetris gameplay, controlled by keyboard arrow keys
-- Earn 2 points for each cleared line, real-time score display
-- Star rating (1~3 stars) based on score at game over, unachieved stars are shown in gray
-- High score is automatically saved (local browser storage)
-- Pause/Resume supported (button or spacebar)
-- Main menu page shows high score and start button
-- Beautiful, responsive UI for desktop browsers
+---
 
-## How to Run
-1. Download all project files (`menu.html`, `index.html`, `style.css`, `game.js`, etc.) into the same directory
-2. Open `menu.html` in your browser to start the game
+## 项目特色
 
-## Online Demo
-You can deploy this project to GitHub Pages, Gitee Pages, Vercel, Netlify, etc. for an online experience.
+- **三合一**：集成俄罗斯方块、五子棋、2048等游戏，主页面统一入口。
+- **响应式设计**：适配电脑端，布局紧凑美观。
+- **高分记录**：每款游戏支持本地最高分保存。
+- **操作友好**：支持键盘操作，部分游戏支持鼠标/触摸滑动。
+- **弹窗美化**：游戏结束、暂停等弹窗风格统一。
+- **分支管理**：每个游戏和主页面均有独立分支，便于开发和维护。
 
-## Controls
-- Arrow keys ← → ↓: Move and drop tetromino
-- Arrow key ↑: Rotate tetromino
-- Spacebar: Hard drop / Pause (depending on state)
-- "Pause" button at top left: Pause/Resume the game
-- After game over: Restart or return to main menu
+---
 
+## 持续更新与未来计划
 
+本项目将**持续增加更多有趣的网页小游戏**，所有新游戏都会以独立分支开发，并最终集成到主分支，保持界面和交互风格统一。
 
+**计划加入的游戏举例：**
+- 贪吃蛇
+- 扫雷
+- 经典拼图
+- 纸牌/接龙
+- 其他热门休闲小游戏
 
-# Tetris Upgrade 俄罗斯方块升级版
+---
 
-一个现代化的俄罗斯方块网页版，支持星级评价、最高分记录、暂停功能和主菜单页面。
+## 分支说明
 
-## 功能特色
-- 经典俄罗斯方块玩法，键盘方向键操作
-- 每消除一行加2分，积分实时显示
-- 游戏结束后根据积分显示1~3颗星，未获得的星为灰色
-- 最高纪录自动保存（本地浏览器）
-- 支持暂停/继续（按钮或空格键）
-- 主菜单页面可查看最高分并开始新游戏
-- 响应式美观界面，适合PC端浏览
+| 分支名      | 说明                         | 主要文件                                      |
+| ----------- | ---------------------------- | --------------------------------------------- |
+| `main`      | 集成正式版，包含所有游戏      | 全部文件                                      |
+| `homepage`  | 主页/菜单开发专用            | `index.html`, `menu.html`, `style.css`        |
+| `tetris`    | 俄罗斯方块专用分支           | `game.html`, `game.js`, `menu.html`, `style.css` |
+| `gomoku`    | 五子棋专用分支               | `gomoku.html`, `gomoku.js`, `style.css`       |
+| `2048`      | 2048专用分支                 | `2048.html`, `2048.js`, `style.css`           |
+
+---
+
+## 文件结构
+
+```
+game-demo/
+├── index.html         # 主页/菜单入口
+├── menu.html          # 俄罗斯方块菜单
+├── game.html          # 俄罗斯方块页面
+├── game.js            # 俄罗斯方块逻辑
+├── gomoku.html        # 五子棋页面
+├── gomoku.js          # 五子棋逻辑
+├── 2048.html          # 2048页面
+├── 2048.js            # 2048逻辑
+├── style.css          # 全站样式
+```
+
+---
 
 ## 如何运行
-1. 下载本项目所有文件（menu.html、index.html、style.css、game.js等）到同一目录
-2. 用浏览器打开 `menu.html` 即可开始游戏
 
-## 在线体验
-你可以将本项目上传到 GitHub Pages、Gitee Pages、Vercel、Netlify 等平台，获得在线访问链接。
+1. **下载所有文件**到同一目录（建议用 `main` 分支获得完整体验）。
+2. 用浏览器打开 `index.html` 或 `menu.html` 进入主页面。
+3. 选择你想玩的游戏，点击进入即可开始体验。
+
+---
 
 ## 操作说明
-- 方向键 ← → ↓ 控制方块移动和下落
-- 方向键 ↑ 旋转方块
-- 空格键：硬降/暂停（取决于当前状态）
-- 左上角"暂停"按钮可暂停/继续游戏
-- 游戏结束后可重新开始或返回主菜单
 
+- **俄罗斯方块**：方向键控制移动/旋转，空格暂停，Tab硬降。
+- **五子棋**：鼠标点击落子，支持悔棋、重新开始。
+- **2048**：方向键移动方块，支持本地最高分记录。
+
+---
+
+## 分支开发建议
+
+- 每个分支只维护对应游戏或页面的相关文件，便于独立开发和测试。
+- 需要集成时，将各分支合并到 `main`，形成完整网站。
+- 如需新功能或实验，可新建 `feature-xxx` 分支。
+
+---
+
+欢迎大家提出建议或提交 Pull Request，一起丰富游戏中心的内容！
