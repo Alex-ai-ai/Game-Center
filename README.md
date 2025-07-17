@@ -1,3 +1,43 @@
+# Gomoku Web
+
+A modern web version of Gomoku (Five in a Row), supporting player vs player, player vs AI, undo, and a main menu page.
+
+## Features
+
+- Classic Gomoku gameplay, supports player vs player or player vs AI
+- Responsive board layout, smooth operation
+- Supports undo and restart
+- Main menu page to select mode and start a new game
+- Beautiful, responsive UI for desktop browsers
+
+## How to Run
+
+1. Download all project files (`gomoku.html`, `gomoku.js`, `style.css`, etc.) into the same directory
+2. Open `gomoku.html` in your browser to start the game
+
+## Controls
+
+- Click on the board to place a piece
+- Choose between player vs player or player vs AI mode
+- Supports undo and restart
+
+## Branches
+
+- `gomoku` branch: Contains only the Gomoku game and related files
+- `main` branch: Integrates all games and the main menu
+
+## Future Plans
+
+- Add a stronger AI opponent
+- Support for online multiplayer
+- Add game record saving and playback features
+
+## Contribution
+
+Suggestions and Pull Requests are welcome!
+
+---
+
 # 五子棋网页版
 
 一个现代化的五子棋（Gomoku）网页小游戏，支持人机对战、悔棋、主菜单页面等功能。
