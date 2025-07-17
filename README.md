@@ -1,57 +1,77 @@
-# Tetris Upgrade
+# 2048 Upgrade
 
-A modern Tetris web game with star rating, high score record, pause feature, and main menu page.
+A modern web version of 2048, supporting local high score saving, keyboard controls, and a main menu page.
 
 ## Features
-- Classic Tetris gameplay, controlled by keyboard arrow keys
-- Earn 2 points for each cleared line, real-time score display
-- Star rating (1~3 stars) based on score at game over, unachieved stars are shown in gray
+
+- Classic 2048 number merging gameplay, controlled by keyboard arrow keys
+- Real-time score display for each merge
 - High score is automatically saved (local browser storage)
-- Pause/Resume supported (button or spacebar)
-- Main menu page shows high score and start button
+- Main menu page to view high score and start a new game
 - Beautiful, responsive UI for desktop browsers
 
 ## How to Run
-1. Download all project files (`menu.html`, `index.html`, `style.css`, `game.js`, etc.) into the same directory
-2. Open `menu.html` in your browser to start the game
 
-## Online Demo
-You can deploy this project to GitHub Pages, Gitee Pages, Vercel, Netlify, etc. for an online experience.
+1. Download all project files (`2048.html`, `2048.js`, `style.css`, etc.) into the same directory
+2. Open `2048.html` in your browser to start the game
 
 ## Controls
-- Arrow keys ← → ↓: Move and drop tetromino
-- Arrow key ↑: Rotate tetromino
-- Spacebar: Hard drop / Pause (depending on state)
-- "Pause" button at top left: Pause/Resume the game
-- After game over: Restart or return to main menu
 
+- Arrow keys ← → ↑ ↓ to move the tiles
+- Merge tiles with the same number to get higher scores
+- You can restart the game after game over
 
+## Branches
 
+- `2048` branch: Contains only the 2048 game and related files
+- `main` branch: Integrates all games and the main menu
 
-# Tetris Upgrade 俄罗斯方块升级版
+## Future Plans
 
-一个现代化的俄罗斯方块网页版，支持星级评价、最高分记录、暂停功能和主菜单页面。
+- Add more animations and effects
+- Support for mobile touch controls
+- Add leaderboard and ranking features
+
+## Contribution
+
+Suggestions and Pull Requests are welcome!
+
+---
+
+# 2048 升级版
+
+一个现代化的 2048 网页小游戏，支持本地最高分记录、键盘操作、主菜单页面等功能。
 
 ## 功能特色
-- 经典俄罗斯方块玩法，键盘方向键操作
-- 每消除一行加2分，积分实时显示
-- 游戏结束后根据积分显示1~3颗星，未获得的星为灰色
-- 最高纪录自动保存（本地浏览器）
-- 支持暂停/继续（按钮或空格键）
+
+- 经典 2048 数字合成玩法，键盘方向键操作
+- 每次合成更高数字，分数实时显示
+- 最高分自动保存（本地浏览器存储）
 - 主菜单页面可查看最高分并开始新游戏
-- 响应式美观界面，适合PC端浏览
+- 响应式美观界面，适合 PC 端浏览
 
 ## 如何运行
-1. 下载本项目所有文件（menu.html、index.html、style.css、game.js等）到同一目录
-2. 用浏览器打开 `menu.html` 即可开始游戏
 
-## 在线体验
-你可以将本项目上传到 GitHub Pages、Gitee Pages、Vercel、Netlify 等平台，获得在线访问链接。
+1. 下载本项目所有文件（`2048.html`、`2048.js`、`style.css` 等）到同一目录
+2. 用浏览器打开 `2048.html` 即可开始游戏
 
 ## 操作说明
-- 方向键 ← → ↓ 控制方块移动和下落
-- 方向键 ↑ 旋转方块
-- 空格键：硬降/暂停（取决于当前状态）
-- 左上角"暂停"按钮可暂停/继续游戏
-- 游戏结束后可重新开始或返回主菜单
 
+- 方向键 ← → ↑ ↓ 控制数字方块移动
+- 合并相同数字方块获得更高分数
+- 游戏结束后可重新开始
+
+## 分支说明
+
+- `2048` 分支：只包含 2048 游戏相关的全部内容
+- `main` 分支：集成所有游戏和主菜单
+
+## 未来计划
+
+- 增加更多动画和特效
+- 支持移动端触控操作
+- 增加排行榜等功能
+
+## 贡献指南
+
+欢迎提出建议或提交 Pull Request！
