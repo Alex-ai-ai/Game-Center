@@ -15,6 +15,11 @@
             color: white;
         }
 
+        html, body {
+            overflow: hidden;
+            height: 100%;
+        }
+
         .header {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -169,14 +174,14 @@
                 <button class="play-button">敬请期待</button>
             </div>
 
-            <div class="game-card coming-soon">
+            <a href="2048.html" class="game-card">
                 <div class="game-icon">
                     <i class="fas fa-dice"></i>
                 </div>
                 <h2 class="game-title">2048</h2>
-                <p class="game-description">数字益智游戏，即将推出...</p>
-                <button class="play-button">敬请期待</button>
-            </div>
+                <p class="game-description">数字益智游戏，合成更大的数字挑战极限！</p>
+                <button class="play-button">开始游戏</button>
+            </a>
 
             <a href="gomoku.html" class="game-card">
                 <div class="game-icon">

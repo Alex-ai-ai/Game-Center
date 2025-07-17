@@ -367,8 +367,10 @@ class Gomoku {
         if (this.gameOver || (this.gameMode === 'ai' && this.currentPlayer === 'white')) return;
 
         const rect = this.canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
 
         // 计算最近的交叉点
         const col = Math.round((x - this.margin) / this.cellSize);
@@ -390,8 +392,10 @@ class Gomoku {
         if (this.gameOver || (this.gameMode === 'ai' && this.currentPlayer === 'white')) return;
 
         const rect = this.canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
 
         // 计算落子的行列位置
         const col = Math.round((x - this.margin) / this.cellSize);
