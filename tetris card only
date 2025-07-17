@@ -1,0 +1,9 @@
+<!-- 俄罗斯方块 -->
+<a href="menu.html" class="game-card">
+    <div class="game-icon">
+        <i class="fas fa-th"></i>
+    </div>
+    <h2 class="game-title">俄罗斯方块</h2>
+    <p class="game-description">经典的俄罗斯方块游戏，挑战你的反应能力和策略思维！</p>
+    <button class="play-button">开始游戏</button>
+</a>
