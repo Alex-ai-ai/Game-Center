@@ -336,13 +336,11 @@ function merge(piece) {
             if (shape[i][j]) {
                 const newY = piece.y + i;
                 const newX = piece.x + j;
-                // 确保只在有效范围内合并方块
+                // 只要newY>=0就写入board，newY<0才判定gameOver
                 if (newY >= 0 && newY < ROWS && newX >= 0 && newX < COLS) {
                     board[newY][newX] = piece.color;
-                    // 检查是否触及顶部
-                    if (newY <= 0) {
-                        gameEnds = true;
-                    }
+                } else if (newY < 0) {
+                    gameEnds = true;
                 }
             }
         }
@@ -435,9 +433,9 @@ function clearLines() {
             levelPanel.offsetHeight;
             levelPanel.style.animation = 'levelUp 0.5s';
         }
-        return true;
+        return lines; // 返回消除的行数
     }
-    return false;
+    return 0;
 }
 
 function updateScore() {
@@ -527,6 +525,7 @@ function move(dx, dy) {
             endGame();
             return false;
         }
+        draw(); // 只在全部处理后重绘一次
     }
     return false;
 }
@@ -545,7 +544,7 @@ function hardDrop() {
 function tick() {
     if (paused || gameOver) return;
     move(0, 1);
-    draw();
+    // draw(); // 移除tick中的draw，避免多余重绘
 }
 
 function setPause(state) {

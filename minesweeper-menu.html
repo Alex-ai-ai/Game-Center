@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷 - 难度选择</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <button class="back-button" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i>
+            返回
+        </button>
+        <h1>扫雷</h1>
+        <button class="rules-button" onclick="showRules()">
+            <i class="fas fa-question-circle"></i>
+            规则
+        </button>
+    </header>
+    <div class="container">
+        <div class="difficulty-container">
+            <h1 class="tetris-title">MINESWEEPER</h1>
+            <h2 class="difficulty-title">选择难度</h2>
+            <div class="difficulty-grid">
+                <div class="difficulty-card" onclick="startGame(9,9,10)">
+                    <div class="difficulty-icon"><i class="fas fa-bomb"></i></div>
+                    <div class="difficulty-name">基础</div>
+                    <div class="difficulty-desc">9×9，10雷</div>
+                </div>
+                <div class="difficulty-card" onclick="startGame(16,16,40)">
+                    <div class="difficulty-icon"><i class="fas fa-flag"></i></div>
+                    <div class="difficulty-name">中级</div>
+                    <div class="difficulty-desc">16×16，40雷</div>
+                </div>
+                <div class="difficulty-card" onclick="startGame(16,30,99)">
+                    <div class="difficulty-icon"><i class="fas fa-skull-crossbones"></i></div>
+                    <div class="difficulty-name">专家</div>
+                    <div class="difficulty-desc">16×30，99雷</div>
+                </div>
+                <div class="difficulty-card" style="flex-direction:column;align-items:center;" onclick="showCustom()">
+                    <div class="difficulty-icon"><i class="fas fa-cogs"></i></div>
+                    <div class="difficulty-name">自定义</div>
+                    <div class="difficulty-desc">自定义行列和雷数</div>
+                </div>
+            </div>
+            <div id="custom-panel" style="display:none;margin-top:2rem;">
+                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;">
+                    <label>行 <input id="custom-rows" type="number" min="5" max="30" value="9" style="width:60px;"></label>
+                    <label>列 <input id="custom-cols" type="number" min="5" max="40" value="9" style="width:60px;"></label>
+                    <label>雷 <input id="custom-mines" type="number" min="1" max="668" value="10" style="width:60px;"></label>
+                    <button class="start-button" style="margin-left:1rem;" onclick="customStart()">开始</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 规则弹窗 -->
+    <div class="rules-modal" id="rulesModal">
+        <div class="rules-content">
+            <h2>游戏规则</h2>
+            <div class="rules-section">
+                <h3>基本规则:</h3>
+                <ul>
+                    <li>点击格子来揭示内容</li>
+                    <li>数字表示周围格子中地雷的数量（最多8个）</li>
+                    <li>右键点击可以标记可疑的地雷位置</li>
+                    <li>避免点击地雷，揭示所有安全格子即可获胜</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>操作说明:</h3>
+                <ul>
+                    <li>左键点击：揭示格子</li>
+                    <li>右键点击：标记/取消标记地雷</li>
+                    <li>双击已揭示的数字：快速揭示周围未标记的格子</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>难度说明:</h3>
+                <ul>
+                    <li>基础模式: 9×9网格，10个地雷，适合新手</li>
+                    <li>中级模式: 16×16网格，40个地雷，标准难度</li>
+                    <li>专家模式: 16×30网格，99个地雷，高难度挑战</li>
+                    <li>自定义模式: 可自由设置网格大小和地雷数量</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>游戏技巧:</h3>
+                <ul>
+                    <li>从角落或边缘开始游戏，减少需要考虑的格子</li>
+                    <li>优先处理数字为1的格子，周围只有一个地雷</li>
+                    <li>利用逻辑推理，避免盲目猜测</li>
+                    <li>注意时间，挑战更快的完成速度</li>
+                </ul>
+            </div>
+            <button class="close-rules" onclick="hideRules()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        function startGame(rows, cols, mines) {
+            window.location.href = `minesweeper.html?rows=${rows}&cols=${cols}&mines=${mines}`;
+        }
+        function showCustom() {
+            document.getElementById('custom-panel').style.display = 'block';
+        }
+        function customStart() {
+            const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('custom-rows').value)));
+            const cols = Math.max(5, Math.min(40, parseInt(document.getElementById('custom-cols').value)));
+            const maxMines = rows * cols - 1;
+            let mines = parseInt(document.getElementById('custom-mines').value);
+            mines = Math.max(1, Math.min(maxMines, mines));
+            startGame(rows, cols, mines);
+        }
+        
+        // 显示规则
+        function showRules() {
+            const rulesModal = document.getElementById('rulesModal');
+            rulesModal.style.display = 'flex';
+        }
+        
+        // 隐藏规则
+        function hideRules() {
+            const rulesModal = document.getElementById('rulesModal');
+            rulesModal.style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        document.addEventListener('DOMContentLoaded', () => {
+            const rulesModal = document.getElementById('rulesModal');
+            rulesModal.addEventListener('click', (e) => {
+                if (e.target === rulesModal) {
+                    hideRules();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
