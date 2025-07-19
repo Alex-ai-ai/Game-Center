@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷 - 大网游戏</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1F1F3A, #1A1A2E);
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .minesweeper-container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .minesweeper-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 18px;
+        }
+        .digit-panel {
+            background: #222;
+            color: #FF3B3B;
+            font-family: 'Digital-7', 'Consolas', monospace;
+            font-size: 2.1rem;
+            padding: 0.2rem 1.1rem 0.2rem 1.1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px #000a inset;
+            letter-spacing: 2px;
+            min-width: 60px;
+            text-align: center;
+            border: 2px solid #333;
+        }
+        .face-btn {
+            background: #eee;
+            border: 2px solid #bbb;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: box-shadow 0.1s;
+        }
+        .face-btn:active {
+            box-shadow: 0 1px 2px #0004 inset;
+        }
+        .minesweeper-board {
+            margin: 0 auto 20px auto;
+            display: grid;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+            gap: 2px;
+        }
+        .minesweeper-btns {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .minesweeper-btns button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .minesweeper-btns button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .minesweeper-board {
+                max-width: 98vw;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="minesweeper-container">
+        <div class="minesweeper-topbar">
+            <div class="digit-panel" id="mine-count">010</div>
+            <button class="face-btn" id="face-btn"><span id="face-icon">😊</span></button>
+            <div class="digit-panel" id="timer">000</div>
+        </div>
+        <div class="minesweeper-btns">
+            <button id="restart-btn">重新开始</button>
+            <button onclick="window.location.href='index.html'">返回首页</button>
+        </div>
+        <div class="minesweeper-board" id="minesweeper-board"></div>
+    </div>
+    <script src="minesweeper.js"></script>
+</body>
+</html> 
