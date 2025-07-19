@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大网游戏</title>
+    <title>Game Center</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
@@ -29,6 +29,26 @@
             justify-content: space-between;
         }
 
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .header h1 {
             margin: 0;
             font-size: 2rem;
@@ -36,6 +56,7 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            font-weight: bold;
         }
 
         .container {
@@ -137,6 +158,18 @@
                 padding: 1rem;
             }
 
+            .logo {
+                gap: 0.5rem;
+            }
+
+            .logo i {
+                font-size: 2rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
             .container {
                 padding: 0 1rem;
             }
@@ -149,7 +182,10 @@
 </head>
 <body>
     <header class="header">
-        <h1>大网游戏</h1>
+        <div class="logo">
+            <i class="fas fa-gamepad"></i>
+            <h1>Game Center</h1>
+        </div>
     </header>
 
     <div class="container">
@@ -164,15 +200,15 @@
                 <button class="play-button">开始游戏</button>
             </a>
 
-            <!-- 敬请期待的游戏 -->
-            <div class="game-card coming-soon">
+            <!-- 扫雷游戏卡片 -->
+            <a href="minesweeper-menu.html" class="game-card">
                 <div class="game-icon">
-                    <i class="fas fa-gamepad"></i>
+                    <i class="fas fa-bomb"></i>
                 </div>
-                <h2 class="game-title">贪吃蛇</h2>
-                <p class="game-description">经典的贪吃蛇游戏，即将推出...</p>
-                <button class="play-button">敬请期待</button>
-            </div>
+                <h2 class="game-title">扫雷</h2>
+                <p class="game-description">经典扫雷游戏，挑战你的逻辑与运气！</p>
+                <button class="play-button">开始游戏</button>
+            </a>
 
             <a href="2048.html" class="game-card">
                 <div class="game-icon">
