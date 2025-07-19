@@ -1,0 +1,9 @@
+<!-- 扫雷游戏卡片 -->
+<a href="minesweeper-menu.html" class="game-card">
+    <div class="game-icon">
+        <i class="fas fa-bomb"></i>
+    </div>
+    <h2 class="game-title">扫雷</h2>
+    <p class="game-description">经典扫雷游戏，挑战你的逻辑与运气！</p>
+    <button class="play-button">开始游戏</button>
+</a>
