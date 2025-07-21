@@ -103,13 +103,15 @@ class Gomoku {
 
         // 根据难度级别设置AI思考时间
         const thinkingTime = {
-            'easy': 500,
-            'medium': 300,
-            'hard': 100
+            'easy': 0,
+            'medium': 0,
+            'hard': 0
         }[this.difficulty];
 
         // 模拟AI思考时间
         await new Promise(resolve => setTimeout(resolve, thinkingTime));
+
+        // 这里只是模拟，需要更复杂的逻辑实现AI功能
 
         const move = this.calculateBestMove();
         if (move) {
