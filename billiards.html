@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桌球游戏</title>
+  <link rel="stylesheet" href="style.css?v=20260703-3">
+  <style>
+    :root {
+      --bg: #fbfcff;
+      --bg2: #eaeaf0;
+      --panel: rgba(255,255,255,0.88);
+      --text: #222;
+      --muted: #888;
+      --gold: #ff6b6b;
+      --cyan: #4ecdc4;
+      --green: #166534;
+      --rail: #6f3f1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255, 107, 107, 0.20), transparent 30rem),
+        radial-gradient(circle at 88% 8%, rgba(78, 205, 196, 0.22), transparent 32rem),
+        radial-gradient(circle at 50% 100%, rgba(116, 92, 255, 0.12), transparent 34rem),
+        linear-gradient(180deg, #fbfcff 0%, #eef3ff 46%, #f8f7fb 100%);
+      color: var(--text);
+      font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+    }
+
+    .game {
+      width: min(96vw, 1040px);
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 0.8rem 0;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-shrink: 0;
+    }
+
+    .back-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 0 0 23px;
+      border-radius: 0;
+      background: transparent !important;
+      border: 0;
+      color: #444;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      line-height: 1;
+      box-shadow: none !important;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 0.2s, opacity 0.2s;
+    }
+
+    .back-button::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border-left: 3px solid #444;
+      border-bottom: 3px solid #444;
+      background: transparent !important;
+      transform: translateY(-50%) rotate(45deg);
+      box-shadow: none;
+    }
+
+    .back-button::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      width: 10px;
+      height: 3px;
+      border-radius: 999px;
+      background: #444;
+      transform: translateY(-50%);
+      box-shadow: none;
+    }
+
+    .back-button:hover {
+      filter: none;
+      opacity: 0.6;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      transform: translateX(-18px);
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border: 1px solid #e8e8ee;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(248,250,255,0.88));
+      backdrop-filter: blur(14px);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(30, 40, 80, 0.08);
+    }
+
+    .pill strong { color: var(--text); }
+
+    .pill.active {
+      border-color: rgba(255, 209, 102, 0.55);
+      color: var(--gold);
+      box-shadow: 0 0 24px rgba(255, 209, 102, 0.14);
+    }
+
+    .table-wrap {
+      position: relative;
+      padding: 24px;
+      border-radius: 34px;
+      background: linear-gradient(145deg, #8a552c, #4d2813);
+      box-shadow:
+        0 30px 80px rgba(30, 40, 80, 0.22),
+        inset 0 0 0 7px rgba(255, 255, 255, 0.08),
+        inset 0 0 0 14px rgba(42, 18, 6, 0.35);
+    }
+
+    canvas {
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      display: block;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.08), transparent 28rem),
+        linear-gradient(135deg, #18723b, #0d562b);
+      box-shadow:
+        inset 0 0 35px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .help {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .power {
+      width: min(260px, 36vw);
+      height: 12px;
+      border-radius: 999px;
+      background: #e8e8ee;
+      overflow: hidden;
+      box-shadow: inset 0 1px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .power-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .power-text {
+      min-width: 42px;
+      color: var(--text);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .power-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #4ade80, #facc15, #fb7185);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: none;
+      will-change: transform;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    }
+
+    button:hover { filter: brightness(1.04); }
+
+    .message {
+      position: absolute;
+      inset: 24px;
+      display: none;
+      place-items: center;
+      border-radius: 22px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      padding: 28px;
+    }
+
+    .message.show { display: grid; }
+
+    .message-card {
+      max-width: 420px;
+      padding: 28px;
+      border-radius: 28px;
+      background: #fff;
+      border: 1px solid #e8e8ee;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    }
+
+    .message-card h2 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      color: #222;
+    }
+
+    .message-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* 模式选择菜单 */
+    .menu {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: block;
+      background: #f4f4f8;
+      color: #222;
+      overflow: auto;
+    }
+
+    .menu.hide { display: none; }
+
+    .menu-card {
+      width: min(1200px, 100%);
+      margin: 2rem auto 0;
+      padding: 0 2rem 2rem;
+      text-align: center;
+    }
+
+    .menu-header {
+      width: 100%;
+      height: 64px;
+      padding: 0 2rem;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      box-shadow: 0 8px 28px rgba(30, 40, 80, 0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.72);
+      box-sizing: border-box;
+    }
+
+    .menu-back {
+      position: absolute;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      padding: 0 0 0 23px;
+      border-radius: 0;
+      background: transparent !important;
+      border: 0;
+      color: #444;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      line-height: 1;
+      box-shadow: none !important;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 0.2s, opacity 0.2s;
+      text-decoration: none;
+    }
+
+    .menu-back::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border-left: 3px solid #444;
+      border-bottom: 3px solid #444;
+      background: transparent !important;
+      transform: translateY(-50%) rotate(45deg);
+      box-shadow: none;
+    }
+
+    .menu-back::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      width: 10px;
+      height: 3px;
+      border-radius: 999px;
+      background: #444;
+      transform: translateY(-50%);
+      box-shadow: none;
+    }
+
+    .menu-back:hover {
+      filter: none;
+      opacity: 0.6;
+    }
+
+    .menu-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-card h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 0;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .menu-card p {
+      margin: 0 auto 1.5rem;
+      max-width: 720px;
+      color: #888;
+      line-height: 1.7;
+    }
+
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .mode-btn {
+      position: relative;
+      min-height: 240px;
+      border-radius: 18px;
+      padding: 1.5rem;
+      background: #fff;
+      color: #222;
+      border: 1px solid #e8e8ee;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+      text-align: center;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .mode-btn:hover {
+      transform: translateY(-5px);
+      background: #fff;
+      border-color: #e0e0e8;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .mode-btn strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #222;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .mode-btn span {
+      display: block;
+      color: #888;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .mode-icon {
+      display: grid;
+      place-items: center;
+      width: 4.5rem;
+      height: 4.5rem;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      color: transparent;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.45), transparent 18%),
+        linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      font-size: 0;
+    }
+
+    .mode-icon::before {
+      content: attr(data-label);
+      display: grid;
+      place-items: center;
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      color: white;
+      font-size: 1.35rem;
+      font-weight: 900;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .mode-desc {
+      min-height: 3.2em;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .play-button {
+      margin-top: auto;
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.4;
+      transition: 0.3s;
+    }
+
+    .mode-btn:hover .play-button {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 720px) {
+      body { overflow: auto; }
+
+      .rules-button {
+        position: static;
+        display: block;
+        width: fit-content;
+        margin: 1rem auto;
+      }
+
+      .topbar,
+      .help {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .stats { justify-content: flex-start; }
+
+      .mode-buttons { grid-template-columns: 1fr; }
+
+      .table-wrap {
+        padding: 14px;
+        border-radius: 24px;
+      }
+
+      .message { inset: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 模式选择菜单 -->
+  <div class="menu" id="menu">
+    <div class="menu-header">
+      <a href="index.html" class="menu-back">返回</a>
+      <div class="menu-logo">
+        <h2>桌球游戏</h2>
+      </div>
+    </div>
+    <div class="menu-card">
+      <p>选择对战模式开始桌球比赛。拖拽距离会直接决定击球力度，拖得越远，球打得越重。</p>
+      <div class="mode-buttons">
+        <button class="mode-btn" data-mode="friend">
+          <div class="mode-icon" data-label="2P"></div>
+          <strong>好友对战</strong>
+          <div class="mode-desc"><span>两名玩家轮流击球，进球继续出杆，未进球换手。</span></div>
+          <div class="play-button">开始游戏</div>
+        </button>
+        <button class="mode-btn" data-mode="ai">
+          <div class="mode-icon" data-label="AI"></div>
+          <strong>AI 对战</strong>
+          <div class="mode-desc"><span>你和电脑轮流比赛，AI 会选择目标球并自动击球。</span></div>
+          <div class="play-button">开始游戏</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 游戏界面 -->
+  <div class="game">
+    <div class="topbar">
+      <div class="title-group">
+        <button class="back-button" id="backToMenu">返回</button>
+        <h1>桌球游戏</h1>
+      </div>
+      <div class="stats">
+        <div class="pill">模式：<strong id="modeLabel">未选择</strong></div>
+        <div class="pill active">当前：<strong id="turnLabel">玩家 1</strong></div>
+        <div class="pill">比分：<strong id="scoreLabel">0 : 0</strong></div>
+        <div class="pill">剩余彩球：<strong id="left">0</strong></div>
+        <div class="pill">杆数：<strong id="shots">0</strong></div>
+        <button id="reset">重新开始</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <canvas id="table"></canvas>
+      <div class="message" id="message">
+        <div class="message-card">
+          <h2>游戏结束</h2>
+          <p id="finalText"></p>
+          <button id="playAgain">再来一局</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="help">
+      <div id="helpText">玩法：先选择对战模式。在白球附近按住并向后拖动，拖得越远力度越大，松开后击球。</div>
+      <div class="power-wrap">
+        <div class="power"><div class="power-fill" id="powerFill"></div></div>
+        <span class="power-text" id="powerText">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 规则按钮 -->
+  <button class="rules-button" id="rulesOpen">规则</button>
+
+  <!-- 规则弹窗 -->
+  <div class="rules-overlay" id="rulesOverlay" aria-hidden="true">
+    <div class="rules-card">
+      <h3>游戏规则</h3>
+      <div class="rules-section">
+        <h4>基本规则</h4>
+        <ul>
+          <li>首颗非 8 号球进洞后，该球类型分配给当前玩家（1-7 全色，9-15 条纹），对方获得另一组。</li>
+          <li>白球必须先碰到自己组的球，否则犯规。</li>
+          <li>8 号球最后打进洞的一方获胜。</li>
+        </ul>
+      </div>
+      <div class="rules-section">
+        <h4>犯规规则</h4>
+        <ul>
+          <li>白球进洞 — 对方获得任意球。</li>
+          <li>白球没有碰到任何球 — 对方获得任意球。</li>
+          <li>白球先碰到对方球 — 对方获得任意球。</li>
+          <li>把对方球打进洞 — 对方获得任意球。</li>
+        </ul>
+      </div>
+      <div class="rules-section">
+        <h4>操作说明</h4>
+        <ul>
+          <li>在白球附近按住并向后拖动瞄准，松开击球。</li>
+          <li>拖得越远力度越大。</li>
+          <li>任意球时点击台面放置白球。</li>
+        </ul>
+      </div>
+      <button class="exit-game-button" id="rulesClose">退出游戏</button>
+    </div>
+  </div>
+
+  <script src="billiards.js"></script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=20260703-3">
+    <style>
+        body {
+            background:
+                radial-gradient(circle at 8% 12%, rgba(255, 107, 107, 0.20), transparent 30rem),
+                radial-gradient(circle at 88% 8%, rgba(78, 205, 196, 0.22), transparent 32rem),
+                radial-gradient(circle at 50% 100%, rgba(116, 92, 255, 0.12), transparent 34rem),
+                linear-gradient(180deg, #fbfcff 0%, #eef3ff 46%, #f8f7fb 100%);
+            background-attachment: fixed;
+            color: #222;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        /* 游戏界面元素 */
+        .minesweeper-container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .minesweeper-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 18px;
+        }
+        .digit-panel {
+            background: #222;
+            color: #FF3B3B;
+            font-family: 'Digital-7', 'Consolas', monospace;
+            font-size: 2.1rem;
+            padding: 0.2rem 1.1rem 0.2rem 1.1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px #000a inset;
+            letter-spacing: 2px;
+            min-width: 60px;
+            text-align: center;
+            border: 2px solid #333;
+        }
+        .face-btn {
+            background: #eee;
+            border: 2px solid #bbb;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: box-shadow 0.1s;
+        }
+        .face-btn:active {
+            box-shadow: 0 1px 2px #0004 inset;
+        }
+        .minesweeper-board {
+            margin: 0 auto 20px auto;
+            display: grid;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+            gap: 2px;
+        }
+        .minesweeper-btns {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .minesweeper-btns button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .minesweeper-btns button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .minesweeper-board {
+                max-width: 98vw;
+                overflow-x: auto;
+            }
+        }
+
+        /* 隐藏控制 */
+        .menu-section, .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .menu-section.hidden, .game-section.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ====== 难度选择区域 ====== -->
+    <div class="menu-section" id="menuSection">
+        <header class="header">
+            <button class="back-button" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i>
+                返回
+            </button>
+            <h1>扫雷</h1>
+            <button class="rules-button" onclick="showRules()">
+                <i class="fas fa-question-circle"></i>
+                规则
+            </button>
+        </header>
+        <div class="container">
+            <div class="difficulty-container">
+                <h1 class="tetris-title">MINESWEEPER</h1>
+                <h2 class="difficulty-title">选择难度</h2>
+                <div class="difficulty-grid">
+                    <div class="difficulty-card" onclick="startGame(9,9,10)">
+                        <div class="difficulty-icon"><i class="fas fa-bomb"></i></div>
+                        <div class="difficulty-name">基础</div>
+                        <div class="difficulty-desc">9×9，10雷</div>
+                    </div>
+                    <div class="difficulty-card" onclick="startGame(16,16,40)">
+                        <div class="difficulty-icon"><i class="fas fa-flag"></i></div>
+                        <div class="difficulty-name">中级</div>
+                        <div class="difficulty-desc">16×16，40雷</div>
+                    </div>
+                    <div class="difficulty-card" onclick="startGame(16,30,99)">
+                        <div class="difficulty-icon"><i class="fas fa-skull-crossbones"></i></div>
+                        <div class="difficulty-name">专家</div>
+                        <div class="difficulty-desc">16×30，99雷</div>
+                    </div>
+                    <div class="difficulty-card" style="flex-direction:column;align-items:center;" onclick="showCustom()">
+                        <div class="difficulty-icon"><i class="fas fa-cogs"></i></div>
+                        <div class="difficulty-name">自定义</div>
+                        <div class="difficulty-desc">自定义行列和雷数</div>
+                    </div>
+                </div>
+                <div id="custom-panel" style="display:none;margin-top:2rem;">
+                    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;">
+                        <label>行 <input id="custom-rows" type="number" min="5" max="30" value="9" style="width:60px;"></label>
+                        <label>列 <input id="custom-cols" type="number" min="5" max="40" value="9" style="width:60px;"></label>
+                        <label>雷 <input id="custom-mines" type="number" min="1" max="668" value="10" style="width:60px;"></label>
+                        <button class="start-button" style="margin-left:1rem;" onclick="customStart()">开始</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== 游戏区域 ====== -->
+    <div class="game-section hidden" id="gameSection">
+        <div class="minesweeper-container">
+            <div class="minesweeper-topbar">
+                <div class="digit-panel" id="mine-count">000</div>
+                <button class="face-btn" id="face-btn"><span id="face-icon">😊</span></button>
+                <div class="digit-panel" id="timer">000</div>
+            </div>
+            <div class="minesweeper-btns">
+                <button id="restart-btn">重新开始</button>
+                <button onclick="backToMenu()">返回菜单</button>
+            </div>
+            <div class="minesweeper-board" id="minesweeper-board"></div>
+        </div>
+    </div>
+
+    <!-- ====== 规则弹窗 ====== -->
+    <div class="rules-modal" id="rulesModal">
+        <div class="rules-content">
+            <h2>游戏规则</h2>
+            <div class="rules-section">
+                <h3>基本规则:</h3>
+                <ul>
+                    <li>点击格子来揭示内容</li>
+                    <li>数字表示周围格子中地雷的数量（最多8个）</li>
+                    <li>右键点击可以标记可疑的地雷位置</li>
+                    <li>避免点击地雷，揭示所有安全格子即可获胜</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>操作说明:</h3>
+                <ul>
+                    <li>左键点击：揭示格子</li>
+                    <li>右键点击：标记/取消标记地雷</li>
+                    <li>双击已揭示的数字：快速揭示周围未标记的格子</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>难度说明:</h3>
+                <ul>
+                    <li>基础模式: 9×9网格，10个地雷，适合新手</li>
+                    <li>中级模式: 16×16网格，40个地雷，标准难度</li>
+                    <li>专家模式: 16×30网格，99个地雷，高难度挑战</li>
+                    <li>自定义模式: 可自由设置网格大小和地雷数量</li>
+                </ul>
+            </div>
+            <div class="rules-section">
+                <h3>游戏技巧:</h3>
+                <ul>
+                    <li>从角落或边缘开始游戏，减少需要考虑的格子</li>
+                    <li>优先处理数字为1的格子，周围只有一个地雷</li>
+                    <li>利用逻辑推理，避免盲目猜测</li>
+                    <li>注意时间，挑战更快的完成速度</li>
+                </ul>
+            </div>
+            <button class="close-rules" onclick="hideRules()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        // ====== 难度选择逻辑 ======
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+        function hideRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+        function showCustom() {
+            document.getElementById('custom-panel').style.display = 'block';
+        }
+        function customStart() {
+            const rows = Math.max(5, Math.min(30, parseInt(document.getElementById('custom-rows').value)));
+            const cols = Math.max(5, Math.min(40, parseInt(document.getElementById('custom-cols').value)));
+            const maxMines = rows * cols - 1;
+            let mines = parseInt(document.getElementById('custom-mines').value);
+            mines = Math.max(1, Math.min(maxMines, mines));
+            startGame(rows, cols, mines);
+        }
+        function startGame(rows, cols, mines) {
+            // 隐藏菜单，显示游戏
+            document.getElementById('menuSection').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+            initGame(rows, cols, mines);
+        }
+        function backToMenu() {
+            document.getElementById('menuSection').classList.remove('hidden');
+            document.getElementById('gameSection').classList.add('hidden');
+        }
+
+        // ====== 扫雷核心逻辑 ======
+        const NUMBER_COLORS = ['', '#1976D2', '#388E3C', '#D32F2F', '#7B1FA2', '#F57C00', '#0288D1', '#000', '#757575'];
+
+        var ROWS = 9, COLS = 9, MINES = 10;
+        var board, revealed, flagged, mineSet, timer, timerValue, gameOver, firstClick, remainMines;
+
+        const boardDiv = document.getElementById('minesweeper-board');
+        const mineCountPanel = document.getElementById('mine-count');
+        const timerPanel = document.getElementById('timer');
+        const faceBtn = document.getElementById('face-btn');
+        const faceIcon = document.getElementById('face-icon');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function setBoardGrid() {
+            boardDiv.style.gridTemplateColumns = 'repeat(' + COLS + ', 32px)';
+            boardDiv.style.gridTemplateRows = 'repeat(' + ROWS + ', 32px)';
+        }
+
+        function fmt(n) {
+            n = Math.min(999, Math.max(0, n));
+            return (n < 10 ? '00' : n < 100 ? '0' : '') + n;
+        }
+
+        function updateMineDisplay() {
+            mineCountPanel.textContent = fmt(remainMines);
+        }
+
+        function initGame(r, c, m) {
+            ROWS = r; COLS = c; MINES = m;
+            board = [];
+            revealed = [];
+            flagged = [];
+            mineSet = [];
+            gameOver = false;
+            firstClick = true;
+            timerValue = 0;
+            remainMines = MINES;
+            boardDiv.innerHTML = '';
+            setBoardGrid();
+            updateMineDisplay();
+            if (timer) { clearInterval(timer); timer = null; }
+            timerPanel.textContent = '000';
+            faceIcon.textContent = '😊';
+            for (let i = 0; i < ROWS; i++) {
+                board[i] = [];
+                revealed[i] = [];
+                flagged[i] = [];
+                mineSet[i] = [];
+                for (let j = 0; j < COLS; j++) {
+                    board[i][j] = 0;
+                    revealed[i][j] = false;
+                    flagged[i][j] = false;
+                    mineSet[i][j] = false;
+                    const cell = document.createElement('div');
+                    cell.style.width = '32px';
+                    cell.style.height = '32px';
+                    cell.style.display = 'flex';
+                    cell.style.alignItems = 'center';
+                    cell.style.justifyContent = 'center';
+                    cell.style.fontSize = '16px';
+                    cell.style.fontWeight = 'bold';
+                    cell.style.cursor = 'pointer';
+                    cell.style.background = '#c0c0c0';
+                    cell.style.border = '3px solid';
+                    cell.style.borderColor = '#fff #808080 #808080 #fff';
+                    cell.style.boxSizing = 'border-box';
+                    cell.style.userSelect = 'none';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener('click', function(e) { handleClick(this); });
+                    cell.addEventListener('contextmenu', function(e) { e.preventDefault(); handleRightClick(this); });
+                    cell.addEventListener('dblclick', function(e) { handleDblClick(this); });
+                    boardDiv.appendChild(cell);
+                }
+            }
+        }
+
+        function placeMines(excludeR, excludeC) {
+            let placed = 0;
+            while (placed < MINES) {
+                const r = Math.floor(Math.random() * ROWS);
+                const c = Math.floor(Math.random() * COLS);
+                if (mineSet[r][c]) continue;
+                if (Math.abs(r - excludeR) <= 1 && Math.abs(c - excludeC) <= 1) continue;
+                mineSet[r][c] = true;
+                placed++;
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = r + dr, nc = c + dc;
+                        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) board[nr][nc]++;
+                    }
+                }
+            }
+        }
+
+        function getCell(r, c) {
+            return boardDiv.querySelector('[data-row="' + r + '"][data-col="' + c + '"]');
+        }
+
+        function renderAll() {
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const cell = getCell(i, j);
+                    if (!cell) continue;
+                    if (revealed[i][j]) {
+                        cell.style.background = '#d0d0d0';
+                        cell.style.border = '1px solid #bbb';
+                        if (mineSet[i][j]) {
+                            cell.textContent = '💣';
+                            cell.style.fontSize = '18px';
+                        } else if (board[i][j] > 0) {
+                            cell.textContent = board[i][j];
+                            cell.style.color = NUMBER_COLORS[board[i][j]] || '#000';
+                        } else {
+                            cell.textContent = '';
+                        }
+                    } else if (flagged[i][j]) {
+                        cell.style.background = '#c0c0c0';
+                        cell.style.border = '3px solid';
+                        cell.style.borderColor = '#fff #808080 #808080 #fff';
+                        cell.textContent = '🚩';
+                        cell.style.fontSize = '16px';
+                    } else {
+                        cell.style.background = '#c0c0c0';
+                        cell.style.border = '3px solid';
+                        cell.style.borderColor = '#fff #808080 #808080 #fff';
+                        cell.textContent = '';
+                    }
+                }
+            }
+        }
+
+        function reveal(r, c) {
+            if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+            if (revealed[r][c] || flagged[r][c]) return;
+            revealed[r][c] = true;
+            if (mineSet[r][c]) return;
+            if (board[r][c] === 0) {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        reveal(r + dr, c + dc);
+                    }
+                }
+            }
+        }
+
+        function checkWin() {
+            let totalRevealed = 0;
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    if (revealed[i][j]) totalRevealed++;
+                }
+            }
+            if (totalRevealed === ROWS * COLS - MINES) {
+                endGame(true);
+            }
+        }
+
+        function endGame(won) {
+            if (gameOver) return;
+            gameOver = true;
+            if (timer) { clearInterval(timer); timer = null; }
+            if (won) {
+                faceIcon.textContent = '😎';
+            } else {
+                faceIcon.textContent = '😵';
+                for (let i = 0; i < ROWS; i++) {
+                    for (let j = 0; j < COLS; j++) {
+                        if (mineSet[i][j] && !flagged[i][j]) {
+                            revealed[i][j] = true;
+                        }
+                        if (flagged[i][j] && !mineSet[i][j]) {
+                            flagged[i][j] = false;
+                            const cell = getCell(i, j);
+                            if (cell) cell.textContent = '❌';
+                        }
+                    }
+                }
+            }
+            renderAll();
+        }
+
+        function handleClick(cell) {
+            if (gameOver) return;
+            const r = parseInt(cell.dataset.row);
+            const c = parseInt(cell.dataset.col);
+            if (flagged[r][c]) return;
+            if (revealed[r][c]) return;
+            if (firstClick) {
+                firstClick = false;
+                placeMines(r, c);
+                timer = setInterval(function() {
+                    timerValue++;
+                    timerPanel.textContent = fmt(timerValue);
+                }, 1000);
+            }
+            if (mineSet[r][c]) {
+                revealed[r][c] = true;
+                endGame(false);
+                return;
+            }
+            reveal(r, c);
+            renderAll();
+            checkWin();
+        }
+
+        function handleRightClick(cell) {
+            if (gameOver) return;
+            const r = parseInt(cell.dataset.row);
+            const c = parseInt(cell.dataset.col);
+            if (revealed[r][c]) return;
+            flagged[r][c] = !flagged[r][c];
+            remainMines += flagged[r][c] ? -1 : 1;
+            updateMineDisplay();
+            renderAll();
+        }
+
+        function handleDblClick(cell) {
+            if (gameOver) return;
+            const r = parseInt(cell.dataset.row);
+            const c = parseInt(cell.dataset.col);
+            if (!revealed[r][c] || board[r][c] === 0) return;
+            let flagCount = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && flagged[nr][nc]) flagCount++;
+                }
+            }
+            if (flagCount !== board[r][c]) return;
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && !flagged[nr][nc] && !revealed[nr][nc]) {
+                        if (mineSet[nr][nc]) {
+                            endGame(false);
+                            return;
+                        }
+                        reveal(nr, nc);
+                    }
+                }
+            }
+            renderAll();
+            checkWin();
+        }
+
+        // 重新开始
+        restartBtn.addEventListener('click', function() {
+            initGame(ROWS, COLS, MINES);
+        });
+
+        // 规则弹窗外部点击关闭
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('rulesModal').addEventListener('click', function(e) {
+                if (e.target === this) hideRules();
+            });
+        });
+    </script>
+</body>
+</html>
